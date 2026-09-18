@@ -13,6 +13,9 @@ if (!process.env.TEST_DATABASE_URL) {
 // src/lib/env.ts and src/db/client.ts read DATABASE_URL, never TEST_DATABASE_URL directly — this
 // is the one place that substitutes the test database for it, so every test exercises the exact
 // same client code path production uses.
-if (!process.env.DATABASE_URL) {
-  process.env.DATABASE_URL = process.env.TEST_DATABASE_URL;
-}
+//
+// Always overrides, never just falls back when unset — a deployed environment (like the VPS
+// container this app runs in) has its own real DATABASE_URL set for the running app, and if the
+// test suite honored that value it would run every `delete from` in this suite against
+// production data. Tests must never be able to reach the real database, full stop.
+process.env.DATABASE_URL = process.env.TEST_DATABASE_URL;
