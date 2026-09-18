@@ -35,7 +35,19 @@ export function QrScanner() {
     try {
       scanner = new Html5QrcodeScanner(
         CONTAINER_ID,
-        { fps: 10, qrbox: 250 },
+        {
+          fps: 8,
+          qrbox: 250,
+          // iOS Safari's WKWebView has a low video-memory ceiling — asking for the camera's
+          // default (often 1080p+) resolution has been reported to crash the tab outright
+          // ("This page couldn't load") rather than just running slowly. Capping it here keeps
+          // this working across browsers instead of just the ones with more headroom.
+          videoConstraints: {
+            facingMode: "environment",
+            width: { ideal: 640 },
+            height: { ideal: 480 },
+          },
+        },
         false,
       );
     } catch {
