@@ -16,9 +16,19 @@ export const auth = betterAuth({
   baseURL: env.BETTER_AUTH_URL,
   emailAndPassword: {
     enabled: true,
-    // No public signup route exists — accounts are created only by scripts/seed-admin.ts. See
+    // No public signup route exists — accounts are created only by scripts/seed-admin.ts and,
+    // for the read-only "anfitrion" role, by an admin from /admin/usuarios. See
     // knowledge/shapes/internal-tool.md: "invite-only, no public signup route exists".
     disableSignUp: true,
+  },
+  user: {
+    additionalFields: {
+      role: {
+        type: "string",
+        input: false,
+        defaultValue: "admin",
+      },
+    },
   },
   // Must be last in the plugins array (Better Auth's own requirement). Without it, calling
   // auth.api.signInEmail from a server action returns a session but never sets the browser's

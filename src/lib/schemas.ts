@@ -30,3 +30,10 @@ export const registroSchema = z.object({
 });
 
 export type RegistroInput = z.infer<typeof registroSchema>;
+
+export const createHostUserSchema = z.object({
+  name: z.string().trim().min(1, "name is required"),
+  email: z.string().trim().email("must be a valid email"),
+});
+
+export type CreateHostUserInput = z.infer<typeof createHostUserSchema>;

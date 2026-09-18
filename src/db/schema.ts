@@ -1,6 +1,7 @@
 import {
   boolean,
   integer,
+  pgEnum,
   pgTable,
   text,
   timestamp,
@@ -12,12 +13,17 @@ import {
 // which use Better Auth's own text-id generation because they are adapter-managed, not
 // hand-written — see src/lib/auth.ts, the only file that reads or writes them directly.
 
+// "admin" manages stations and personnel; "anfitrion" is read-only on the dashboard — see
+// src/proxy.ts for where the split is enforced.
+export const userRole = pgEnum("user_role", ["admin", "anfitrion"]);
+
 export const user = pgTable("user", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
   email: text("email").notNull().unique(),
   emailVerified: boolean("email_verified").notNull().default(false),
   image: text("image"),
+  role: userRole("role").notNull().default("admin"),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),

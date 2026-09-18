@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { CopyCodeButton } from "@/components/copy-code-button";
 import { db } from "@/db/client";
 import { verificationStation } from "@/db/schema";
 import {
@@ -7,7 +8,6 @@ import {
   deactivateStationAction,
   rotateStationCodeAction,
 } from "./actions";
-import { CopyCodeButton } from "./copy-code-button";
 
 export default async function EstacionesPage({
   searchParams,

@@ -1,7 +1,9 @@
+import { headers } from "next/headers";
 import {
   AttendanceTable,
   LiveAttendanceCounter,
 } from "@/components/attendance-table";
+import { auth } from "@/lib/auth";
 import { getAttendanceRows } from "@/server/stats";
 
 // Protected by src/proxy.ts (matcher: /admin/:path*) and reads live DB state on every request —
@@ -11,7 +13,13 @@ import { getAttendanceRows } from "@/server/stats";
 export const dynamic = "force-dynamic";
 
 export default async function AdminDashboardPage() {
-  const rows = await getAttendanceRows();
+  const [rows, session] = await Promise.all([
+    getAttendanceRows(),
+    auth.api.getSession({ headers: await headers() }),
+  ]);
+  const role =
+    (session?.user as { role?: string } | undefined)?.role ?? "admin";
+  const isAdmin = role === "admin";
 
   return (
     <main className="mx-auto min-h-dvh max-w-4xl px-4 py-8">
@@ -23,12 +31,22 @@ export default async function AdminDashboardPage() {
           </p>
         </div>
         <div className="flex items-center gap-4">
-          <a
-            href="/admin/estaciones"
-            className="text-sm text-primary underline"
-          >
-            Estaciones
-          </a>
+          {isAdmin && (
+            <>
+              <a
+                href="/admin/estaciones"
+                className="text-sm text-primary underline"
+              >
+                Estaciones
+              </a>
+              <a
+                href="/admin/usuarios"
+                className="text-sm text-primary underline"
+              >
+                Usuarios
+              </a>
+            </>
+          )}
           <a
             href="/api/admin/export"
             className="h-11 rounded-lg border border-border bg-surface px-4 text-sm font-medium leading-[44px]"
