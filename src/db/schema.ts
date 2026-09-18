@@ -137,3 +137,13 @@ export const ticketDownloadLog = pgTable("ticket_download_log", {
     .notNull()
     .defaultNow(),
 });
+
+// One row per failed "buscar mi ticket" attempt — a successful lookup never writes here. Read by
+// src/server/rate-limit.ts with a one-hour window; see CLAUDE.md's rate-limiting note.
+export const lookupAttempt = pgTable("lookup_attempt", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  cip: text("cip").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});

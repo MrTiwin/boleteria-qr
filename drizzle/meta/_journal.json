@@ -8,6 +8,13 @@
       "when": 1789700151754,
       "tag": "0000_giant_harpoon",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1789703067673,
+      "tag": "0001_closed_wrecker",
+      "breakpoints": true
     }
   ]
 }

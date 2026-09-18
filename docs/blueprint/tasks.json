@@ -192,7 +192,8 @@
       "src/app/mi-ticket/actions.ts",
       "tests/server/rate-limit.test.ts"
     ],
-    "status": "pending"
+    "status": "in_progress",
+    "note": "Code complete, tsc/biome pass. All 3 tests hit the same ECONNREFUSED blocker (beforeEach seeds personnel). New lookup_attempt table added to schema.ts (append-only, one row per FAILED lookup only — a successful one never writes here); migration 0001 generated, covering this table plus the E1-T3 auth tables that had never been migrated. Added src/app/mi-ticket/mi-ticket-form.tsx (client leaf, not in original files list) following the same pattern as registro-form.tsx. This closes epic 01-foundation (E1-T1..T7) — all in_progress pending a real Postgres to run the DB-touching half of every test suite."
   },
   {
     "id": "E2-T1",
