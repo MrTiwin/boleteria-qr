@@ -19,7 +19,12 @@ export async function registroAction(
   });
 
   if (!parsed.success) {
-    return { error: { code: "INVALID_INPUT", message: "Completa CIP y DNI." } };
+    return {
+      error: {
+        code: "INVALID_INPUT",
+        message: parsed.error.issues[0]?.message ?? "Completa CIP y DNI.",
+      },
+    };
   }
 
   const result = await registerByCredentials(parsed.data);

@@ -11,7 +11,7 @@ export async function createHostUserAction(formData: FormData) {
   });
   if (!parsed.success) {
     redirect(
-      `/admin/usuarios?error=${encodeURIComponent("Nombre y correo son obligatorios.")}`,
+      `/admin/usuarios?error=${encodeURIComponent(parsed.error.issues[0]?.message ?? "Nombre y correo son obligatorios.")}`,
     );
   }
 

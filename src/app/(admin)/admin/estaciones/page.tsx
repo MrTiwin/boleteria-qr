@@ -13,9 +13,9 @@ import {
 export default async function EstacionesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ newCode?: string; label?: string }>;
+  searchParams: Promise<{ newCode?: string; label?: string; error?: string }>;
 }) {
-  const { newCode, label } = await searchParams;
+  const { newCode, label, error } = await searchParams;
   const stations = await db.select().from(verificationStation);
 
   return (
@@ -30,6 +30,15 @@ export default async function EstacionesPage({
       <h1 className="mt-2 text-2xl font-semibold">
         Estaciones de verificación
       </h1>
+
+      {error && (
+        <p
+          role="alert"
+          className="mt-4 rounded-lg border border-danger/30 bg-danger/10 p-4 text-sm text-danger"
+        >
+          {error}
+        </p>
+      )}
 
       {newCode && (
         <div
@@ -57,6 +66,7 @@ export default async function EstacionesPage({
             id="label"
             name="label"
             required
+            maxLength={60}
             className="mt-1 h-11 w-full rounded-lg border border-border bg-background px-3"
           />
         </div>

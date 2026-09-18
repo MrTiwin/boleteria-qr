@@ -23,6 +23,7 @@ export function AdminLoginForm() {
           name="email"
           type="email"
           autoComplete="username"
+          maxLength={254}
           required
           className="mt-1 h-14 w-full rounded-lg border border-border bg-surface px-3 text-base"
         />
@@ -38,6 +39,7 @@ export function AdminLoginForm() {
             name="password"
             type={showPassword ? "text" : "password"}
             autoComplete="current-password"
+            maxLength={200}
             required
             className="h-14 w-full rounded-lg border border-border bg-surface px-3 pr-14 text-base"
           />

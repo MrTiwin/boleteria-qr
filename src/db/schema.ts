@@ -164,3 +164,16 @@ export const stationLoginAttempt = pgTable("station_login_attempt", {
     .notNull()
     .defaultNow(),
 });
+
+// One row per failed admin/anfitrion sign-in attempt, keyed by the attempted email — Better
+// Auth's own built-in rate limiter (src/lib/auth.ts's `rateLimit` option) only guards its HTTP
+// router (/api/auth/*), not direct `auth.api.signInEmail(...)` calls like the one this app's
+// admin login form makes from a server action, so it never actually throttles this form. Read by
+// src/app/(admin)/login/actions.ts with a one-hour window.
+export const adminLoginAttempt = pgTable("admin_login_attempt", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  email: text("email").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});

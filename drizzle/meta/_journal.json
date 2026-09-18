@@ -29,6 +29,13 @@
       "when": 1789757933072,
       "tag": "0003_nostalgic_ted_forrester",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1789771613622,
+      "tag": "0004_happy_electro",
+      "breakpoints": true
     }
   ]
 }

@@ -66,6 +66,7 @@ export default async function UsuariosPage({
           <input
             id="name"
             name="name"
+            maxLength={100}
             required
             className="mt-1 h-11 w-full rounded-lg border border-border bg-background px-3"
           />
@@ -78,6 +79,7 @@ export default async function UsuariosPage({
             id="email"
             name="email"
             type="email"
+            maxLength={254}
             required
             className="mt-1 h-11 w-full rounded-lg border border-border bg-background px-3"
           />

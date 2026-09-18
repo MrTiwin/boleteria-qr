@@ -79,6 +79,7 @@ export default async function EditPersonnelPage({
           <input
             id="grado"
             name="grado"
+            maxLength={30}
             defaultValue={person.grado}
             required
             className="mt-1 h-11 w-full rounded-lg border border-border bg-background px-3"
@@ -92,6 +93,7 @@ export default async function EditPersonnelPage({
           <input
             id="apellidos"
             name="apellidos"
+            maxLength={100}
             defaultValue={person.apellidos}
             required
             className="mt-1 h-11 w-full rounded-lg border border-border bg-background px-3"
@@ -105,6 +107,7 @@ export default async function EditPersonnelPage({
           <input
             id="nombres"
             name="nombres"
+            maxLength={100}
             defaultValue={person.nombres}
             required
             className="mt-1 h-11 w-full rounded-lg border border-border bg-background px-3"
@@ -120,6 +123,8 @@ export default async function EditPersonnelPage({
             name="cip"
             defaultValue={person.cip}
             inputMode="numeric"
+            pattern="[0-9]*"
+            maxLength={15}
             required
             className="mt-1 h-11 w-full rounded-lg border border-border bg-background px-3 tabular-nums"
           />
@@ -134,6 +139,8 @@ export default async function EditPersonnelPage({
             name="dni"
             defaultValue={person.dni}
             inputMode="numeric"
+            pattern="[0-9]*"
+            maxLength={15}
             required
             className="mt-1 h-11 w-full rounded-lg border border-border bg-background px-3 tabular-nums"
           />

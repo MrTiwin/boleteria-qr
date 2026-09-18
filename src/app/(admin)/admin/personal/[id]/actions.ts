@@ -18,7 +18,7 @@ export async function updatePersonnelAction(formData: FormData) {
 
   if (!parsed.success) {
     redirect(
-      `/admin/personal/${id}?error=${encodeURIComponent("Revisa los campos obligatorios.")}`,
+      `/admin/personal/${id}?error=${encodeURIComponent(parsed.error.issues[0]?.message ?? "Revisa los campos obligatorios.")}`,
     );
   }
 

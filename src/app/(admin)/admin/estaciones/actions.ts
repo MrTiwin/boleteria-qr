@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { createStationSchema } from "@/lib/schemas";
 import {
   activateStation,
   createStation,
@@ -9,14 +10,18 @@ import {
 } from "@/server/stations";
 
 export async function createStationAction(formData: FormData) {
-  const label = String(formData.get("label") ?? "").trim();
-  if (!label) {
-    redirect("/admin/estaciones");
+  const parsed = createStationSchema.safeParse({
+    label: formData.get("label"),
+  });
+  if (!parsed.success) {
+    redirect(
+      `/admin/estaciones?error=${encodeURIComponent(parsed.error.issues[0]?.message ?? "Nombre inválido.")}`,
+    );
   }
 
-  const { code } = await createStation(label);
+  const { code } = await createStation(parsed.data.label);
   redirect(
-    `/admin/estaciones?newCode=${encodeURIComponent(code)}&label=${encodeURIComponent(label)}`,
+    `/admin/estaciones?newCode=${encodeURIComponent(code)}&label=${encodeURIComponent(parsed.data.label)}`,
   );
 }
 

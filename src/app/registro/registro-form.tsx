@@ -29,6 +29,8 @@ export function RegistroForm() {
           id="cip"
           name="cip"
           inputMode="numeric"
+          pattern="[0-9]*"
+          maxLength={15}
           required
           className="mt-1 h-14 w-full rounded-lg border border-border bg-background px-3 text-base tabular-nums transition-colors duration-150 focus:border-primary"
         />
@@ -42,6 +44,8 @@ export function RegistroForm() {
           id="dni"
           name="dni"
           inputMode="numeric"
+          pattern="[0-9]*"
+          maxLength={15}
           required
           className="mt-1 h-14 w-full rounded-lg border border-border bg-background px-3 text-base tabular-nums transition-colors duration-150 focus:border-primary"
         />

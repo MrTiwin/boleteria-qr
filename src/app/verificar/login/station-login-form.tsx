@@ -21,6 +21,7 @@ export function StationLoginForm() {
           id="code"
           name="code"
           autoComplete="off"
+          maxLength={30}
           required
           className="mt-1 h-14 w-full rounded-lg border border-border bg-background px-3 text-base transition-colors duration-150 focus:border-primary"
         />
