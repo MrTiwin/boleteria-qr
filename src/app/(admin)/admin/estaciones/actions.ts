@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import {
+  activateStation,
   createStation,
   deactivateStation,
   rotateStationCode,
@@ -31,5 +32,11 @@ export async function rotateStationCodeAction(formData: FormData) {
 export async function deactivateStationAction(formData: FormData) {
   const stationId = String(formData.get("stationId") ?? "");
   await deactivateStation(stationId);
+  redirect("/admin/estaciones");
+}
+
+export async function activateStationAction(formData: FormData) {
+  const stationId = String(formData.get("stationId") ?? "");
+  await activateStation(stationId);
   redirect("/admin/estaciones");
 }

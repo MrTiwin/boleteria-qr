@@ -48,6 +48,13 @@ export async function deactivateStation(stationId: string): Promise<void> {
     .where(eq(verificationStation.id, stationId));
 }
 
+export async function activateStation(stationId: string): Promise<void> {
+  await db
+    .update(verificationStation)
+    .set({ active: true })
+    .where(eq(verificationStation.id, stationId));
+}
+
 // Linear scan over active stations only — there are 6-8 of them, and codes are hashed, so there
 // is no indexed lookup available. A deactivated station's code never matches here, even if it is
 // otherwise correct, because the WHERE clause excludes it before any hash comparison runs.

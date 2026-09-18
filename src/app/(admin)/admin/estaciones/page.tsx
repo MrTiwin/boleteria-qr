@@ -2,6 +2,7 @@ import Link from "next/link";
 import { db } from "@/db/client";
 import { verificationStation } from "@/db/schema";
 import {
+  activateStationAction,
   createStationAction,
   deactivateStationAction,
   rotateStationCodeAction,
@@ -93,7 +94,7 @@ export default async function EstacionesPage({
                   Rotar código
                 </button>
               </form>
-              {station.active && (
+              {station.active ? (
                 <form action={deactivateStationAction}>
                   <input type="hidden" name="stationId" value={station.id} />
                   <button
@@ -101,6 +102,16 @@ export default async function EstacionesPage({
                     className="h-9 rounded-lg border border-danger px-3 text-sm text-danger transition-colors duration-150 hover:bg-danger/10"
                   >
                     Desactivar
+                  </button>
+                </form>
+              ) : (
+                <form action={activateStationAction}>
+                  <input type="hidden" name="stationId" value={station.id} />
+                  <button
+                    type="submit"
+                    className="h-9 rounded-lg border border-success px-3 text-sm text-success transition-colors duration-150 hover:bg-success/10"
+                  >
+                    Reactivar
                   </button>
                 </form>
               )}
