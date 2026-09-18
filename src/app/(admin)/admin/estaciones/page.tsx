@@ -15,43 +15,84 @@ export default async function EstacionesPage({
   const stations = await db.select().from(verificationStation);
 
   return (
-    <main>
-      <h1>Estaciones de verificación</h1>
+    <main className="mx-auto min-h-dvh max-w-2xl px-4 py-8">
+      <h1 className="font-fraunces text-2xl font-semibold">
+        Estaciones de verificación
+      </h1>
 
       {newCode && (
-        <p role="alert">
-          Código para {label}: <strong>{newCode}</strong> — anótalo ahora, no se
-          vuelve a mostrar.
+        <p
+          role="alert"
+          className="mt-4 rounded-lg border border-primary bg-surface p-4 text-sm"
+        >
+          Código para {label}:{" "}
+          <strong className="tabular-nums">{newCode}</strong> — anótalo ahora,
+          no se vuelve a mostrar.
         </p>
       )}
 
-      <form action={createStationAction}>
-        <label htmlFor="label">Nombre de la estación</label>
-        <input id="label" name="label" required />
-        <button type="submit">Crear estación</button>
+      <form
+        action={createStationAction}
+        className="mt-6 flex items-end gap-2 rounded-xl border border-border bg-surface p-4"
+      >
+        <div className="flex-1">
+          <label htmlFor="label" className="block text-sm font-medium">
+            Nombre de la estación
+          </label>
+          <input
+            id="label"
+            name="label"
+            required
+            className="mt-1 h-11 w-full rounded-lg border border-border bg-background px-3"
+          />
+        </div>
+        <button
+          type="submit"
+          className="h-11 rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground"
+        >
+          Crear estación
+        </button>
       </form>
 
-      <ul>
+      <ul className="mt-6 divide-y divide-border rounded-xl border border-border">
         {stations.map((station) => (
-          <li key={station.id}>
-            {station.label} — {station.active ? "activa" : "desactivada"}
-            <form
-              action={rotateStationCodeAction}
-              style={{ display: "inline" }}
-            >
-              <input type="hidden" name="stationId" value={station.id} />
-              <input type="hidden" name="label" value={station.label} />
-              <button type="submit">Rotar código</button>
-            </form>
-            {station.active && (
-              <form
-                action={deactivateStationAction}
-                style={{ display: "inline" }}
+          <li
+            key={station.id}
+            className="flex flex-wrap items-center justify-between gap-3 p-4"
+          >
+            <span className="text-sm">
+              {station.label} —{" "}
+              <span
+                className={
+                  station.active ? "text-success" : "text-muted-foreground"
+                }
               >
+                {station.active ? "activa" : "desactivada"}
+              </span>
+            </span>
+            <div className="flex gap-2">
+              <form action={rotateStationCodeAction}>
                 <input type="hidden" name="stationId" value={station.id} />
-                <button type="submit">Desactivar</button>
+                <input type="hidden" name="label" value={station.label} />
+                <button
+                  type="submit"
+                  className="h-9 rounded-lg border border-border bg-surface px-3 text-sm"
+                >
+                  Rotar código
+                </button>
               </form>
-            )}
+              {station.active && (
+                <form action={deactivateStationAction}>
+                  <input type="hidden" name="stationId" value={station.id} />
+                  <button
+                    type="submit"
+                    className="h-9 rounded-lg border border-danger px-3 text-sm text-danger"
+                  >
+                    Desactivar
+                  </button>
+                </form>
+              )}
+            </div>
           </li>
         ))}
       </ul>

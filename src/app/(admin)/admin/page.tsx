@@ -14,10 +14,34 @@ export default async function AdminDashboardPage() {
   const rows = await getAttendanceRows();
 
   return (
-    <main>
-      <h1>Dashboard</h1>
-      <a href="/api/admin/export">Exportar CSV</a>
-      <LiveAttendanceCounter />
+    <main className="mx-auto min-h-dvh max-w-4xl px-4 py-8">
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h1 className="font-fraunces text-2xl font-semibold">Dashboard</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Asistencia en vivo al almuerzo de camaradería.
+          </p>
+        </div>
+        <div className="flex items-center gap-4">
+          <a
+            href="/admin/estaciones"
+            className="text-sm text-primary underline"
+          >
+            Estaciones
+          </a>
+          <a
+            href="/api/admin/export"
+            className="h-11 rounded-lg border border-border bg-surface px-4 text-sm font-medium leading-[44px]"
+          >
+            Exportar CSV
+          </a>
+        </div>
+      </div>
+
+      <div className="mt-6">
+        <LiveAttendanceCounter />
+      </div>
+
       <AttendanceTable rows={rows} />
     </main>
   );
