@@ -276,8 +276,8 @@
       "src/components/attendance-table.tsx",
       "tests/server/stats.test.ts"
     ],
-    "status": "in_progress",
-    "note": "Code complete, tsc/biome pass. All 3 tests hit the usual ECONNREFUSED (beforeEach seeds an admin user). Added better-auth/next-js's nextCookies() plugin to src/lib/auth.ts — without it, auth.api.signInEmail called from a server action never sets the browser's session cookie; verified the fix is real by extracting Set-Cookie from an asResponse:true sign-in and replaying it as a Cookie header in the test, which is also how the test authenticates against the route's GET handler directly (no HTTP server spun up). Added src/server/stats.ts (getAdminStats, getAttendanceRows), src/app/providers.tsx (TanStack Query provider, wired into root layout — first thing in the app to need it), and src/app/(admin)/login/{actions,admin-login-form}.tsx (not in original files list, same pattern as other login flows). AttendanceTable duplicates the AttendanceRow type locally instead of importing it from src/server/stats.ts, per CLAUDE.md's boundary rule (components must never import server/)."
+    "status": "done",
+    "note": "Verified for real on GitHub Actions CI run #4 (commit 6408c41, all green) — part of the 40/40 passing suite against a real Postgres service container. Added better-auth/next-js's nextCookies() plugin to src/lib/auth.ts — without it, auth.api.signInEmail called from a server action never sets the browser's session cookie; verified the fix is real by extracting Set-Cookie from an asResponse:true sign-in and replaying it as a Cookie header in the test, which is also how the test authenticates against the route's GET handler directly (no HTTP server spun up). Added src/server/stats.ts (getAdminStats, getAttendanceRows), src/app/providers.tsx (TanStack Query provider, wired into root layout — first thing in the app to need it), and src/app/(admin)/login/{actions,admin-login-form}.tsx (not in original files list, same pattern as other login flows). AttendanceTable duplicates the AttendanceRow type locally instead of importing it from src/server/stats.ts, per CLAUDE.md's boundary rule (components must never import server/)."
   },
   {
     "id": "E2-T4",
@@ -300,8 +300,8 @@
       "src/server/export.ts",
       "tests/server/export.test.ts"
     ],
-    "status": "in_progress",
-    "note": "Code complete, tsc/biome pass. Both tests hit the usual ECONNREFUSED (beforeEach seeds an admin user). Reuses getAttendanceRows() from E2-T3's src/server/stats.ts rather than re-querying — one source of truth for 'what a row of attendance means'. CSV fields are minimally escaped (quote-wrap on comma/quote/newline) since names can contain commas in principle. Also added an 'Exportar CSV' link to the admin dashboard page (src/app/(admin)/admin/page.tsx) for usability, not required by the acceptance criteria."
+    "status": "done",
+    "note": "Verified for real on GitHub Actions CI run #4 (commit 6408c41, all green) — part of the 40/40 passing suite against a real Postgres service container. Reuses getAttendanceRows() from E2-T3's src/server/stats.ts rather than re-querying — one source of truth for 'what a row of attendance means'. CSV fields are minimally escaped (quote-wrap on comma/quote/newline) since names can contain commas in principle. Also added an 'Exportar CSV' link to the admin dashboard page (src/app/(admin)/admin/page.tsx) for usability, not required by the acceptance criteria."
   },
   {
     "id": "E2-T5",
@@ -348,7 +348,7 @@
       "src/app/api/health/route.ts",
       "tests/server/health.test.ts"
     ],
-    "status": "in_progress",
-    "note": "pnpm build verified for real (exit 0, /api/health correctly dynamic — not statically prerendered). pnpm start + GET / verified for real: HTTP 200. GET /api/health verified for real too, but returns 503 {ok:false,error:{code:'DB_UNREACHABLE'}} rather than 200 — the honest and correct result with no Postgres reachable here, and it proves the route degrades gracefully (a caught error, not a crash) rather than actually reaching the { ok:true, data:{db:'ok'} } success path. .github/workflows/ci.yml written with a postgres service container and migrate step, but GitHub Actions itself has never run — no push to a branch it watches has happened from this session. Mark done only after: (1) a real CI run on GitHub Actions is green, and (2) GET /api/health returns the 200 success shape against a real Postgres."
+    "status": "done",
+    "note": "Verified for real on GitHub Actions (github.com/MrTiwin/boleteria-qr/actions) — CI run #4 (commit 6408c41) is green: install, typecheck, lint, drizzle-kit migrate against a real postgres service container, 40/40 unit tests (including GET /api/health returning the real {ok:true,data:{db:'ok'}} success path against a live Postgres), and pnpm build all passed. pnpm start + GET / verified locally: HTTP 200. Three real CI-only bugs found and fixed across runs #1-#3, none of which were visible from local runs: (1) corepack enable's --install-directory doesn't create its own parent dir — ENOENT on a fresh runner where $HOME/.local doesn't pre-exist; (2) tsc fails on layout.tsx's LayoutProps<\"/\"> without running `next typegen` first, since a bare checkout+install never produces .next/types; (3) tests/lib/import-personnel.test.ts deleted personnel without clearing the dependent ticket row first, only surfacing once test files run serialized against a shared database. This closes all 13 tasks in the blueprint — every task is now either done-and-verified or in_progress with an explicit note on exactly what remains unverified and why."
   }
 ]
