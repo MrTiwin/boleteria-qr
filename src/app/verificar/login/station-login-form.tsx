@@ -22,7 +22,7 @@ export function StationLoginForm() {
           name="code"
           autoComplete="off"
           required
-          className="mt-1 h-14 w-full rounded-lg border border-border bg-surface px-3 text-base"
+          className="mt-1 h-14 w-full rounded-lg border border-border bg-background px-3 text-base"
         />
       </div>
 

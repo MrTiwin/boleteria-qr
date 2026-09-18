@@ -22,7 +22,7 @@ export function RegistroForm() {
           name="cip"
           inputMode="numeric"
           required
-          className="mt-1 h-14 w-full rounded-lg border border-border bg-surface px-3 text-base tabular-nums"
+          className="mt-1 h-14 w-full rounded-lg border border-border bg-background px-3 text-base tabular-nums"
         />
       </div>
 
@@ -35,7 +35,7 @@ export function RegistroForm() {
           name="dni"
           inputMode="numeric"
           required
-          className="mt-1 h-14 w-full rounded-lg border border-border bg-surface px-3 text-base tabular-nums"
+          className="mt-1 h-14 w-full rounded-lg border border-border bg-background px-3 text-base tabular-nums"
         />
       </div>
 

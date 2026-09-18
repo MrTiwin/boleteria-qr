@@ -15,9 +15,10 @@ const fraunces = Fraunces({
 });
 
 export const metadata: Metadata = {
-  title: "Boletería QR",
+  title: "Almuerzo de Confraternidad de Oficiales SCYTE 2026",
   description:
-    "Almuerzo de camaradería — registro y verificación de asistencia",
+    "Almuerzo de Confraternidad de Oficiales SCYTE 2026 — registro y verificación de asistencia",
+  icons: { icon: "/logo-scyte.png" },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

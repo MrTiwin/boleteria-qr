@@ -1,5 +1,6 @@
 import { eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
+import { EventHeader } from "@/components/event-header";
 import { TicketCard } from "@/components/ticket-card";
 import { db } from "@/db/client";
 import { personnel, ticket } from "@/db/schema";
@@ -26,16 +27,19 @@ export default async function TicketPage({
   const qrDataUrl = await generateQrDataUrl(row.ticket.qrToken);
 
   return (
-    <main>
-      <h1>Tu ticket</h1>
-      <TicketCard
-        ticketId={row.ticket.id}
-        qrDataUrl={qrDataUrl}
-        grado={row.personnel.grado}
-        apellidos={row.personnel.apellidos}
-        nombres={row.personnel.nombres}
-        cip={row.personnel.cip}
-      />
+    <main className="mx-auto min-h-dvh max-w-md px-4 py-8">
+      <EventHeader compact />
+      <h2 className="mt-4 text-center text-lg font-semibold">Tu ticket</h2>
+      <div className="mt-6">
+        <TicketCard
+          ticketId={row.ticket.id}
+          qrDataUrl={qrDataUrl}
+          grado={row.personnel.grado}
+          apellidos={row.personnel.apellidos}
+          nombres={row.personnel.nombres}
+          cip={row.personnel.cip}
+        />
+      </div>
     </main>
   );
 }
