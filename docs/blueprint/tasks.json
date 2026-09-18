@@ -28,14 +28,16 @@
       "src/lib/env.ts",
       "tests/db/client.test.ts"
     ],
-    "status": "in_progress",
-    "note": "Code complete, tsc/biome pass, drizzle-kit generate produced drizzle/0000_giant_harpoon.sql. NOT yet verified: drizzle-kit migrate and the db-touching half of tests/db/client.test.ts, because no Postgres was reachable from the builder machine (no local Docker, VPS instance not network-exposed). Also corrected the pinned driver from @neondatabase/serverless (edge/HTTP-only, cannot reach a local or VPS-internal Postgres) to pg — see src/db/client.ts. Run both verify commands against a real Postgres before marking done."
+    "status": "done",
+    "note": "Verified against a real Postgres instance (VPS, boleteria_test database) on 2026-09-18 — full suite (pnpm exec vitest run) reports 34/34 passed, including the 10-concurrent-request race test in E2-T2. Two real bugs found and fixed by this verification pass: tests/setup.ts fell back to TEST_DATABASE_URL only when DATABASE_URL was unset (true locally, false on any deployed environment with its own real DATABASE_URL — now always overrides, unconditionally); vitest ran test files in parallel against the one shared test database, causing cross-file FK races (fileParallelism:false in vitest.config.ts fixes it)."
   },
   {
     "id": "E1-T2",
     "title": "Import CSV de personal con validación estricta",
     "epic": "01-foundation",
-    "dependencies": ["E1-T1"],
+    "dependencies": [
+      "E1-T1"
+    ],
     "priority": "p0",
     "acceptance": [
       "WHEN a CSV row is missing a required field THE SYSTEM SHALL reject the whole import and report the row number and field name.",
@@ -56,14 +58,16 @@
       "src/lib/schemas.ts",
       "tests/lib/import-personnel.test.ts"
     ],
-    "status": "in_progress",
-    "note": "Code complete, tsc/biome pass. 3/4 tests pass (pure validation: missing field, duplicate cip, duplicate dni — none of these touch the DB, since importPersonnel validates before opening a transaction). The 4th test (clean import replaces the table) is NOT verified — same ECONNREFUSED environment blocker as E1-T1. CLI script (scripts/import-personnel.ts) not run end-to-end for the same reason. Run the full suite against a real Postgres before marking done."
+    "status": "done",
+    "note": "Verified against a real Postgres instance (VPS, boleteria_test database) on 2026-09-18 — full suite (pnpm exec vitest run) reports 34/34 passed, including the 10-concurrent-request race test in E2-T2. Two real bugs found and fixed by this verification pass: tests/setup.ts fell back to TEST_DATABASE_URL only when DATABASE_URL was unset (true locally, false on any deployed environment with its own real DATABASE_URL — now always overrides, unconditionally); vitest ran test files in parallel against the one shared test database, causing cross-file FK races (fileParallelism:false in vitest.config.ts fixes it). All in_progress notes below this point are superseded."
   },
   {
     "id": "E1-T3",
     "title": "Auth admin con Better Auth + protección de rutas",
     "epic": "01-foundation",
-    "dependencies": ["E1-T1"],
+    "dependencies": [
+      "E1-T1"
+    ],
     "priority": "p0",
     "acceptance": [
       "WHEN `src/proxy.ts`'s exported `config.matcher` is inspected THE SYSTEM SHALL include a pattern that matches `/admin/dashboard`.",
@@ -84,14 +88,16 @@
       "scripts/seed-admin.ts",
       "tests/lib/auth.test.ts"
     ],
-    "status": "in_progress",
-    "note": "Code complete, tsc/biome pass. 1/4 tests verified for real (proxy config.matcher — no DB). The other 3 (seed idempotency, valid sign-in, invalid sign-in) hit the same ECONNREFUSED environment blocker as E1-T1/E1-T2. Also added src/lib/admin-seed.ts (not in the original files list): auth.disableSignUp is true (no public signup route, per the internal-tool shape), which is real and verified — auth.api.signUpEmail throws EMAIL_PASSWORD_SIGN_UP_DISABLED even from server code, so the seed script writes user+account rows directly using better-auth/crypto's hashPassword instead of calling the disabled API. Run the full suite against a real Postgres before marking done."
+    "status": "done",
+    "note": "Verified against a real Postgres instance (VPS, boleteria_test database) on 2026-09-18 — full suite (pnpm exec vitest run) reports 34/34 passed, including the 10-concurrent-request race test in E2-T2. Two real bugs found and fixed by this verification pass: tests/setup.ts fell back to TEST_DATABASE_URL only when DATABASE_URL was unset (true locally, false on any deployed environment with its own real DATABASE_URL — now always overrides, unconditionally); vitest ran test files in parallel against the one shared test database, causing cross-file FK races (fileParallelism:false in vitest.config.ts fixes it). All in_progress notes below this point are superseded."
   },
   {
     "id": "E1-T4",
     "title": "Flujo de registro: búsqueda, validación CIP/DNI, ticket idempotente",
     "epic": "01-foundation",
-    "dependencies": ["E1-T1"],
+    "dependencies": [
+      "E1-T1"
+    ],
     "priority": "p0",
     "acceptance": [
       "WHEN a valid `cip`+`dni` matching a `personnel` row is submitted with the consent checkbox checked THE SYSTEM SHALL create exactly one `ticket` row for that `personnel_id`.",
@@ -112,14 +118,16 @@
       "src/lib/schemas.ts",
       "tests/server/tickets.test.ts"
     ],
-    "status": "in_progress",
-    "note": "Code complete, tsc/biome pass. All 4 tests hit the same ECONNREFUSED environment blocker as prior tasks — this time even the consent-only check, because beforeEach seeds a personnel row before every test. Also added src/app/registro/registro-form.tsx (client leaf for the CIP/DNI + consent form, not in the original files list) and made createOrGetTicket set ticket.qrToken to a random placeholder — E1-T5 must replace that with the signed HMAC token in the same function, per the epic's Contracts section. Run the full suite against a real Postgres before marking done."
+    "status": "done",
+    "note": "Verified against a real Postgres instance (VPS, boleteria_test database) on 2026-09-18 — full suite (pnpm exec vitest run) reports 34/34 passed, including the 10-concurrent-request race test in E2-T2. Two real bugs found and fixed by this verification pass: tests/setup.ts fell back to TEST_DATABASE_URL only when DATABASE_URL was unset (true locally, false on any deployed environment with its own real DATABASE_URL — now always overrides, unconditionally); vitest ran test files in parallel against the one shared test database, causing cross-file FK races (fileParallelism:false in vitest.config.ts fixes it). All in_progress notes below this point are superseded."
   },
   {
     "id": "E1-T5",
     "title": "Generación de QR con token HMAC firmado + pantalla de ticket",
     "epic": "01-foundation",
-    "dependencies": ["E1-T4"],
+    "dependencies": [
+      "E1-T4"
+    ],
     "priority": "p0",
     "acceptance": [
       "WHEN a ticket is created THE SYSTEM SHALL store a `qr_token` that is a valid HMAC-SHA256 signed payload encoding the ticket id.",
@@ -140,14 +148,16 @@
       "src/server/tickets.ts",
       "tests/lib/qr-token.test.ts"
     ],
-    "status": "in_progress",
-    "note": "Code complete, tsc/biome pass. 3/4 tests verified for real (sign/verify round-trip, tampered signature rejected, malformed token rejected — all pure, no DB). The 4th (createOrGetTicket stores a token that verifies) hits the usual ECONNREFUSED. Uses the qrDataUrl (base64 PNG) embedded directly in the server-rendered page rather than a separate image route — satisfies 'render a PNG QR image generated server-side' without a new route; E1-T6's download-as-image is a distinct client-side concern. ticket.id is now generated in JS (randomUUID) instead of the DB default, since signQrToken needs it before the row exists — this changed createOrGetTicket's insert shape from E1-T4."
+    "status": "done",
+    "note": "Verified against a real Postgres instance (VPS, boleteria_test database) on 2026-09-18 — full suite (pnpm exec vitest run) reports 34/34 passed, including the 10-concurrent-request race test in E2-T2. Two real bugs found and fixed by this verification pass: tests/setup.ts fell back to TEST_DATABASE_URL only when DATABASE_URL was unset (true locally, false on any deployed environment with its own real DATABASE_URL — now always overrides, unconditionally); vitest ran test files in parallel against the one shared test database, causing cross-file FK races (fileParallelism:false in vitest.config.ts fixes it). All in_progress notes below this point are superseded."
   },
   {
     "id": "E1-T6",
     "title": "Descarga del ticket como imagen + log de descargas",
     "epic": "01-foundation",
-    "dependencies": ["E1-T5"],
+    "dependencies": [
+      "E1-T5"
+    ],
     "priority": "p1",
     "acceptance": [
       "WHEN the download endpoint is called for an existing ticket THE SYSTEM SHALL increment `download_count` by 1 and insert one `ticket_download_log` row with the caller's IP.",
@@ -166,14 +176,16 @@
       "src/server/ticket-downloads.ts",
       "tests/server/ticket-downloads.test.ts"
     ],
-    "status": "in_progress",
-    "note": "Code complete, tsc/biome pass. All 3 tests hit the same ECONNREFUSED blocker as before (beforeEach seeds personnel + ticket). The download route only LOGS the download (increment + audit row) and returns JSON — it does not serve image bytes; the PNG capture happens client-side in TicketCard via html-to-image on the rendered card, then the browser triggers the download and separately POSTs to this route to record it. Refactored src/app/ticket/[id]/page.tsx (from E1-T5) to render TicketCard instead of an inline <img>."
+    "status": "done",
+    "note": "Verified against a real Postgres instance (VPS, boleteria_test database) on 2026-09-18 — full suite (pnpm exec vitest run) reports 34/34 passed, including the 10-concurrent-request race test in E2-T2. Two real bugs found and fixed by this verification pass: tests/setup.ts fell back to TEST_DATABASE_URL only when DATABASE_URL was unset (true locally, false on any deployed environment with its own real DATABASE_URL — now always overrides, unconditionally); vitest ran test files in parallel against the one shared test database, causing cross-file FK races (fileParallelism:false in vitest.config.ts fixes it). All in_progress notes below this point are superseded."
   },
   {
     "id": "E1-T7",
     "title": "Buscar mi ticket (CIP+DNI) con rate limiting",
     "epic": "01-foundation",
-    "dependencies": ["E1-T4"],
+    "dependencies": [
+      "E1-T4"
+    ],
     "priority": "p1",
     "acceptance": [
       "WHEN a `cip`+`dni` lookup matches an issued ticket THE SYSTEM SHALL return that ticket's id.",
@@ -192,14 +204,16 @@
       "src/app/mi-ticket/actions.ts",
       "tests/server/rate-limit.test.ts"
     ],
-    "status": "in_progress",
-    "note": "Code complete, tsc/biome pass. All 3 tests hit the same ECONNREFUSED blocker (beforeEach seeds personnel). New lookup_attempt table added to schema.ts (append-only, one row per FAILED lookup only — a successful one never writes here); migration 0001 generated, covering this table plus the E1-T3 auth tables that had never been migrated. Added src/app/mi-ticket/mi-ticket-form.tsx (client leaf, not in original files list) following the same pattern as registro-form.tsx. This closes epic 01-foundation (E1-T1..T7) — all in_progress pending a real Postgres to run the DB-touching half of every test suite."
+    "status": "done",
+    "note": "Verified against a real Postgres instance (VPS, boleteria_test database) on 2026-09-18 — full suite (pnpm exec vitest run) reports 34/34 passed, including the 10-concurrent-request race test in E2-T2. Two real bugs found and fixed by this verification pass: tests/setup.ts fell back to TEST_DATABASE_URL only when DATABASE_URL was unset (true locally, false on any deployed environment with its own real DATABASE_URL — now always overrides, unconditionally); vitest ran test files in parallel against the one shared test database, causing cross-file FK races (fileParallelism:false in vitest.config.ts fixes it). All in_progress notes below this point are superseded."
   },
   {
     "id": "E2-T1",
     "title": "Gestión de estaciones de verificación + sesión de estación",
     "epic": "02-estaciones-dashboard",
-    "dependencies": ["E1-T3"],
+    "dependencies": [
+      "E1-T3"
+    ],
     "priority": "p0",
     "acceptance": [
       "WHEN an admin creates a station THE SYSTEM SHALL store only a hash of its code, never the plaintext, in `verification_station.code_hash`.",
@@ -221,14 +235,17 @@
       "src/app/(admin)/admin/estaciones/actions.ts",
       "src/app/verificar/login/page.tsx"
     ],
-    "status": "in_progress",
-    "note": "Code complete, tsc/biome pass. 2/6 tests verified for real (station-session HMAC token round-trip and tamper-detection — no DB); the other 4 (hash-not-plaintext, verify, rotation, deactivation) hit the usual ECONNREFUSED. Real bug this task caught in its own test file before committing: the beforeEach was declared at file scope, so it ran (and failed on the DB call) before the two pure token tests too — moved it inside the DB-touching describe block. Station codes hashed with better-auth/crypto's hashPassword/verifyPassword (reused from admin-seed.ts, not a new dependency). Station session cookie signed with BETTER_AUTH_SECRET, reusing the HMAC pattern from qr-token.ts rather than adding a third secret. Added src/app/verificar/login/actions.ts and station-login-form.tsx (not in original files list), same client-leaf pattern as registro/mi-ticket."
+    "status": "done",
+    "note": "Verified against a real Postgres instance (VPS, boleteria_test database) on 2026-09-18 — full suite (pnpm exec vitest run) reports 34/34 passed, including the 10-concurrent-request race test in E2-T2. Two real bugs found and fixed by this verification pass: tests/setup.ts fell back to TEST_DATABASE_URL only when DATABASE_URL was unset (true locally, false on any deployed environment with its own real DATABASE_URL — now always overrides, unconditionally); vitest ran test files in parallel against the one shared test database, causing cross-file FK races (fileParallelism:false in vitest.config.ts fixes it). All in_progress notes below this point are superseded."
   },
   {
     "id": "E2-T2",
     "title": "Verificación por cámara con UPDATE atómico anti-doble-uso",
     "epic": "02-estaciones-dashboard",
-    "dependencies": ["E1-T5", "E2-T1"],
+    "dependencies": [
+      "E1-T5",
+      "E2-T1"
+    ],
     "priority": "p0",
     "acceptance": [
       "WHEN a valid, unverified ticket's QR token is submitted to `/api/verify` THE SYSTEM SHALL set `status='verified'`, record `verified_at` and `verified_by_station`, and return `{ ok:true, data:{ alreadyVerified:false } }`.",
@@ -249,14 +266,18 @@
       "src/components/qr-scanner.tsx",
       "tests/server/verify-concurrency.test.ts"
     ],
-    "status": "in_progress",
-    "note": "CRITICAL — the whole anti-double-scan guarantee is unverified. Code complete, tsc/biome pass, and the implementation matches .claude/rules/verification.md exactly: one conditional UPDATE (WHERE id=... AND status='issued') inside a transaction, checked by rowCount, extra SELECT only on the already-verified branch, HMAC checked before any DB call. But all 4 tests — including the 10-concurrent-request race test, the single most important test in this entire project — hit the usual ECONNREFUSED and have NEVER been run against a real Postgres. Do not trust this task's correctness from code review alone; run `pnpm exec vitest run tests/server/verify-concurrency.test.ts` against a real database before the event, specifically the concurrency test."
+    "status": "done",
+    "note": "Verified against a real Postgres instance (VPS, boleteria_test database) on 2026-09-18 — full suite (pnpm exec vitest run) reports 34/34 passed, including the 10-concurrent-request race test in E2-T2. Two real bugs found and fixed by this verification pass: tests/setup.ts fell back to TEST_DATABASE_URL only when DATABASE_URL was unset (true locally, false on any deployed environment with its own real DATABASE_URL — now always overrides, unconditionally); vitest ran test files in parallel against the one shared test database, causing cross-file FK races (fileParallelism:false in vitest.config.ts fixes it). All in_progress notes below this point are superseded."
   },
   {
     "id": "E2-T3",
     "title": "Dashboard admin: contador en vivo + tabla filtrable + login UI",
     "epic": "02-estaciones-dashboard",
-    "dependencies": ["E1-T3", "E1-T2", "E2-T2"],
+    "dependencies": [
+      "E1-T3",
+      "E1-T2",
+      "E2-T2"
+    ],
     "priority": "p0",
     "acceptance": [
       "WHEN `/api/admin/stats` is called by an authenticated admin THE SYSTEM SHALL return `{ ok:true, data:{ verified:number, total:number } }` matching the real `ticket` and `personnel` counts.",
@@ -282,7 +303,9 @@
     "id": "E2-T4",
     "title": "Export CSV de la lista de asistencia final",
     "epic": "02-estaciones-dashboard",
-    "dependencies": ["E2-T3"],
+    "dependencies": [
+      "E2-T3"
+    ],
     "priority": "p1",
     "acceptance": [
       "WHEN an authenticated admin requests `/api/admin/export` THE SYSTEM SHALL return a CSV with one row per `personnel` record including grado, apellidos, nombres, cip, pagado, status, verified_at.",
@@ -305,7 +328,11 @@
     "id": "E2-T5",
     "title": "Sistema de diseño aplicado + responsive + accesibilidad",
     "epic": "02-estaciones-dashboard",
-    "dependencies": ["E2-T3", "E1-T7", "E2-T2"],
+    "dependencies": [
+      "E2-T3",
+      "E1-T7",
+      "E2-T2"
+    ],
     "priority": "p1",
     "acceptance": [
       "WHEN the axe scan runs against `/registro`, `/mi-ticket`, and `/verificar` THE SYSTEM SHALL report 0 violations.",
@@ -313,7 +340,9 @@
       "WHEN a status badge renders THE SYSTEM SHALL include both a text label and an icon element, never color alone.",
       "WHEN `pnpm exec playwright test tests/e2e/accessibility.spec.ts` runs THE SYSTEM SHALL report 0 failed."
     ],
-    "verify": ["pnpm exec playwright test tests/e2e/accessibility.spec.ts"],
+    "verify": [
+      "pnpm exec playwright test tests/e2e/accessibility.spec.ts"
+    ],
     "checkpoint": "step-12-design-a11y",
     "files": [
       "src/app/globals.css",
@@ -327,7 +356,9 @@
     "id": "E2-T6",
     "title": "CI pipeline y verificación de build de producción",
     "epic": "02-estaciones-dashboard",
-    "dependencies": ["E2-T5"],
+    "dependencies": [
+      "E2-T5"
+    ],
     "priority": "p0",
     "acceptance": [
       "WHEN `.github/workflows/ci.yml` runs on a push THE SYSTEM SHALL execute install, typecheck, lint, unit tests and build, failing the job if any step exits non-zero.",
