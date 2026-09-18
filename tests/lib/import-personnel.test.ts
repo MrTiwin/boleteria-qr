@@ -1,7 +1,7 @@
 import { sql } from "drizzle-orm";
 import { describe, expect, it } from "vitest";
 import { db } from "@/db/client";
-import { personnel } from "@/db/schema";
+import { personnel, ticket } from "@/db/schema";
 import { importPersonnel } from "@/lib/import-personnel";
 
 const HEADER = "grado,apellidos,nombres,cip,dni,pagado";
@@ -56,6 +56,10 @@ describe("importPersonnel — validation (no DB write on failure)", () => {
 
 describe("importPersonnel — clean import (touches TEST_DATABASE_URL)", () => {
   it("replaces the personnel table contents inside one transaction", async () => {
+    // ticket.personnel_id references personnel — clear the dependent table first, or this
+    // fails on the FK constraint once any earlier-run test file left a ticket row behind
+    // (test files now run serialized against one shared database — see vitest.config.ts).
+    await db.execute(sql`delete from ${ticket}`);
     await db.execute(sql`delete from ${personnel}`);
     const csv = [
       HEADER,
