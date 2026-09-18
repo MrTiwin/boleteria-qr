@@ -1,5 +1,6 @@
 import { eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
+import { TicketCard } from "@/components/ticket-card";
 import { db } from "@/db/client";
 import { personnel, ticket } from "@/db/schema";
 import { generateQrDataUrl } from "@/lib/qr-image";
@@ -27,19 +28,14 @@ export default async function TicketPage({
   return (
     <main>
       <h1>Tu ticket</h1>
-      {/* biome-ignore lint/performance/noImgElement: a QR data URL generated server-side per request isn't a candidate for next/image's remote optimization pipeline. */}
-      <img
-        src={qrDataUrl}
-        alt={`Código QR del ticket de ${row.personnel.nombres} ${row.personnel.apellidos}`}
-        width={480}
-        height={480}
+      <TicketCard
+        ticketId={row.ticket.id}
+        qrDataUrl={qrDataUrl}
+        grado={row.personnel.grado}
+        apellidos={row.personnel.apellidos}
+        nombres={row.personnel.nombres}
+        cip={row.personnel.cip}
       />
-      <p>
-        {row.personnel.grado} — {row.personnel.apellidos},{" "}
-        {row.personnel.nombres}
-      </p>
-      <p>CIP {row.personnel.cip}</p>
-      <p role="alert">Código personal e intransferible bajo sanción.</p>
     </main>
   );
 }

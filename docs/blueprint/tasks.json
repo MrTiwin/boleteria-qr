@@ -166,7 +166,8 @@
       "src/server/ticket-downloads.ts",
       "tests/server/ticket-downloads.test.ts"
     ],
-    "status": "pending"
+    "status": "in_progress",
+    "note": "Code complete, tsc/biome pass. All 3 tests hit the same ECONNREFUSED blocker as before (beforeEach seeds personnel + ticket). The download route only LOGS the download (increment + audit row) and returns JSON — it does not serve image bytes; the PNG capture happens client-side in TicketCard via html-to-image on the rendered card, then the browser triggers the download and separately POSTs to this route to record it. Refactored src/app/ticket/[id]/page.tsx (from E1-T5) to render TicketCard instead of an inline <img>."
   },
   {
     "id": "E1-T7",
