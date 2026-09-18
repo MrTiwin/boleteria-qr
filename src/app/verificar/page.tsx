@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { EventHeader } from "@/components/event-header";
 import { QrScanner } from "@/components/qr-scanner";
 import { getStationSession } from "@/lib/station-session";
+import { stationLogoutAction } from "./actions";
 
 export default async function VerificarPage() {
   const session = await getStationSession();
@@ -12,6 +13,14 @@ export default async function VerificarPage() {
   return (
     <main className="min-h-dvh px-4 py-6">
       <div className="mx-auto max-w-md">
+        <form action={stationLogoutAction} className="flex justify-end">
+          <button
+            type="submit"
+            className="text-sm text-muted-foreground underline-offset-2 transition-colors duration-150 hover:text-primary hover:underline"
+          >
+            Salir
+          </button>
+        </form>
         <EventHeader compact />
         <h2 className="mt-4 text-lg font-semibold">Escanear ticket</h2>
       </div>

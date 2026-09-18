@@ -5,6 +5,7 @@ import {
 } from "@/components/attendance-table";
 import { auth } from "@/lib/auth";
 import { getAttendanceRows } from "@/server/stats";
+import { adminLogoutAction } from "./logout-action";
 
 // Protected by src/proxy.ts (matcher: /admin/:path*) and reads live DB state on every request —
 // Next.js otherwise tries to prerender this at build time (it has no dynamic API of its own to
@@ -53,6 +54,14 @@ export default async function AdminDashboardPage() {
           >
             Exportar CSV
           </a>
+          <form action={adminLogoutAction}>
+            <button
+              type="submit"
+              className="text-sm text-muted-foreground underline-offset-2 transition-colors duration-150 hover:text-primary hover:underline"
+            >
+              Cerrar sesión
+            </button>
+          </form>
         </div>
       </div>
 

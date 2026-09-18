@@ -1,13 +1,15 @@
+import { BackHomeLink } from "@/components/back-home-link";
 import { AdminLoginForm } from "./admin-login-form";
 
 export default function AdminLoginPage() {
   return (
     <main className="mx-auto flex min-h-dvh max-w-md flex-col justify-center px-4 py-8">
+      <BackHomeLink />
       {/* biome-ignore lint/performance/noImgElement: static logo, see event-header.tsx. */}
       <img
         src="/logo-scyte.png"
         alt="Escudo SCYTE"
-        className="mx-auto h-14 w-auto"
+        className="mx-auto mt-6 h-14 w-auto"
       />
       <h1 className="mt-3 text-center text-2xl font-semibold">
         Panel de administración

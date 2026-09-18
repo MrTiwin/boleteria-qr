@@ -1,10 +1,14 @@
+import { BackHomeLink } from "@/components/back-home-link";
 import { EventHeader } from "@/components/event-header";
 import { StationLoginForm } from "./station-login-form";
 
 export default function VerificarLoginPage() {
   return (
     <main className="mx-auto min-h-dvh max-w-md px-4 py-8">
-      <EventHeader />
+      <BackHomeLink />
+      <div className="mt-4">
+        <EventHeader />
+      </div>
 
       <div className="mt-8 animate-fade-in-delay-2 rounded-xl border border-border bg-surface p-6">
         <h2 className="text-lg font-semibold">Verificación de asistencia</h2>

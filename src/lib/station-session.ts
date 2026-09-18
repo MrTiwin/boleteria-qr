@@ -62,6 +62,11 @@ export async function setStationSessionCookie(
   });
 }
 
+export async function clearStationSessionCookie(): Promise<void> {
+  const jar = await cookies();
+  jar.delete(COOKIE_NAME);
+}
+
 export async function getStationSession(): Promise<{
   stationId: string;
 } | null> {

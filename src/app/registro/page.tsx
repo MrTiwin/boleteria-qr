@@ -1,4 +1,5 @@
 import { ilike, or } from "drizzle-orm";
+import { BackHomeLink } from "@/components/back-home-link";
 import { EventHeader } from "@/components/event-header";
 import { db } from "@/db/client";
 import { personnel } from "@/db/schema";
@@ -27,7 +28,10 @@ export default async function RegistroPage({
 
   return (
     <main className="mx-auto min-h-dvh max-w-md px-4 py-8">
-      <EventHeader />
+      <BackHomeLink />
+      <div className="mt-4">
+        <EventHeader />
+      </div>
 
       <div className="mt-8 animate-fade-in-delay-2 rounded-xl border border-border bg-surface p-6">
         <h2 className="text-lg font-semibold">Registra tu ticket</h2>
