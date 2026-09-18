@@ -1,4 +1,5 @@
 import { eq } from "drizzle-orm";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { EventHeader } from "@/components/event-header";
 import { TicketCard } from "@/components/ticket-card";
@@ -39,6 +40,15 @@ export default async function TicketPage({
           nombres={row.personnel.nombres}
           cip={row.personnel.cip}
         />
+      </div>
+
+      <div className="mt-6 text-center">
+        <Link
+          href="/mi-ticket"
+          className="text-sm text-muted-foreground underline-offset-2 transition-colors duration-150 hover:text-primary hover:underline"
+        >
+          ← Volver a buscar mi ticket
+        </Link>
       </div>
     </main>
   );
