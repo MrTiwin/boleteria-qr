@@ -221,7 +221,8 @@
       "src/app/(admin)/admin/estaciones/actions.ts",
       "src/app/verificar/login/page.tsx"
     ],
-    "status": "pending"
+    "status": "in_progress",
+    "note": "Code complete, tsc/biome pass. 2/6 tests verified for real (station-session HMAC token round-trip and tamper-detection — no DB); the other 4 (hash-not-plaintext, verify, rotation, deactivation) hit the usual ECONNREFUSED. Real bug this task caught in its own test file before committing: the beforeEach was declared at file scope, so it ran (and failed on the DB call) before the two pure token tests too — moved it inside the DB-touching describe block. Station codes hashed with better-auth/crypto's hashPassword/verifyPassword (reused from admin-seed.ts, not a new dependency). Station session cookie signed with BETTER_AUTH_SECRET, reusing the HMAC pattern from qr-token.ts rather than adding a third secret. Added src/app/verificar/login/actions.ts and station-login-form.tsx (not in original files list), same client-leaf pattern as registro/mi-ticket."
   },
   {
     "id": "E2-T2",
