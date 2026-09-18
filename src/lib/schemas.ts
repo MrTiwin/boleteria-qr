@@ -22,3 +22,11 @@ export const personnelCsvRowSchema = z.object({
 });
 
 export type PersonnelCsvRow = z.infer<typeof personnelCsvRowSchema>;
+
+export const registroSchema = z.object({
+  cip: z.string().trim().min(1, "cip is required"),
+  dni: z.string().trim().min(1, "dni is required"),
+  consent: z.boolean(),
+});
+
+export type RegistroInput = z.infer<typeof registroSchema>;

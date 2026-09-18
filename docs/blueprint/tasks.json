@@ -112,7 +112,8 @@
       "src/lib/schemas.ts",
       "tests/server/tickets.test.ts"
     ],
-    "status": "pending"
+    "status": "in_progress",
+    "note": "Code complete, tsc/biome pass. All 4 tests hit the same ECONNREFUSED environment blocker as prior tasks — this time even the consent-only check, because beforeEach seeds a personnel row before every test. Also added src/app/registro/registro-form.tsx (client leaf for the CIP/DNI + consent form, not in the original files list) and made createOrGetTicket set ticket.qrToken to a random placeholder — E1-T5 must replace that with the signed HMAC token in the same function, per the epic's Contracts section. Run the full suite against a real Postgres before marking done."
   },
   {
     "id": "E1-T5",
