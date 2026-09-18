@@ -141,4 +141,7 @@ Tokens live once in `src/app/globals.css`'s `@theme` block. Components reference
 3. Never commit secrets, `.env`, or generated build output.
 4. Never hand-edit a file `drizzle-kit generate` produced under `drizzle/`.
 5. Never mark a task done with a failing gate command.
-6. The `pagado` field is informational only — never gate registration or verification on it.
+6. `pagado` gates new-ticket creation (`src/server/tickets.ts`'s `registerByCredentials` returns
+   `PAYMENT_REQUIRED` for `pagado = false`, pointing them to Crl. John Sánchez Blas). It never
+   gates verification at the door — a ticket that already exists keeps scanning fine regardless
+   of a later `pagado` change.

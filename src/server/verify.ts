@@ -1,16 +1,28 @@
 import "server-only";
 import { and, eq, sql } from "drizzle-orm";
 import { db } from "@/db/client";
-import { ticket, verificationStation } from "@/db/schema";
+import { personnel, ticket, verificationStation } from "@/db/schema";
 import { verifyQrToken } from "@/lib/qr-token";
 import type { ActionResult } from "@/server/tickets";
 
+// The person this ticket belongs to — returned on every successful scan (first-time verify AND
+// already-verified) so station staff can visually confirm identity against the QR holder, not
+// just see a pass/fail badge.
+export type VerifiedPerson = {
+  grado: string;
+  apellidos: string;
+  nombres: string;
+  cip: string;
+  pagado: boolean;
+};
+
 export type VerifyTicketData =
-  | { alreadyVerified: false }
+  | { alreadyVerified: false; person: VerifiedPerson }
   | {
       alreadyVerified: true;
       verifiedAt: Date | null;
       stationLabel: string | null;
+      person: VerifiedPerson;
     };
 
 // The whole anti-double-scan guarantee lives in the single conditional UPDATE below — see
@@ -47,7 +59,14 @@ export async function verifyTicket(
       .returning();
 
     if (updated.length === 1) {
-      return { ok: true, data: { alreadyVerified: false } };
+      const person = await getVerifiedPerson(tx, updated[0].personnelId);
+      if (!person) {
+        return {
+          ok: false,
+          error: { code: "NOT_FOUND", message: "Persona no encontrada." },
+        };
+      }
+      return { ok: true, data: { alreadyVerified: false, person } };
     }
 
     const [current] = await tx
@@ -61,12 +80,22 @@ export async function verifyTicket(
       };
     }
 
-    const stationRows = current.verifiedByStation
-      ? await tx
-          .select()
-          .from(verificationStation)
-          .where(eq(verificationStation.id, current.verifiedByStation))
-      : [];
+    const [stationRows, person] = await Promise.all([
+      current.verifiedByStation
+        ? tx
+            .select()
+            .from(verificationStation)
+            .where(eq(verificationStation.id, current.verifiedByStation))
+        : Promise.resolve([]),
+      getVerifiedPerson(tx, current.personnelId),
+    ]);
+
+    if (!person) {
+      return {
+        ok: false,
+        error: { code: "NOT_FOUND", message: "Persona no encontrada." },
+      };
+    }
 
     return {
       ok: true,
@@ -74,7 +103,25 @@ export async function verifyTicket(
         alreadyVerified: true,
         verifiedAt: current.verifiedAt,
         stationLabel: stationRows[0]?.label ?? null,
+        person,
       },
     };
   });
+}
+
+async function getVerifiedPerson(
+  tx: Parameters<Parameters<typeof db.transaction>[0]>[0],
+  personnelId: string,
+): Promise<VerifiedPerson | null> {
+  const [row] = await tx
+    .select({
+      grado: personnel.grado,
+      apellidos: personnel.apellidos,
+      nombres: personnel.nombres,
+      cip: personnel.cip,
+      pagado: personnel.pagado,
+    })
+    .from(personnel)
+    .where(eq(personnel.id, personnelId));
+  return row ?? null;
 }

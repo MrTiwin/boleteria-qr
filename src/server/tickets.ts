@@ -87,6 +87,21 @@ export async function registerByCredentials(input: {
     };
   }
 
+  // Gate on pagado — deliberate product decision (overrides the older "informational only"
+  // rule that used to live in CLAUDE.md's Non-negotiable section; see that file for the
+  // corrected wording). Only blocks NEW ticket creation, never verification at the door: someone
+  // who already has a ticket keeps scanning fine even if marked unpaid later.
+  if (!person.pagado) {
+    return {
+      ok: false,
+      error: {
+        code: "PAYMENT_REQUIRED",
+        message:
+          "Aún no figuras como pagado. Comunícate con el Crl. John Sánchez Blas (cel. 944986558) para regularizar tu pago antes de generar tu ticket.",
+      },
+    };
+  }
+
   const row = await createOrGetTicket(person.id);
   return { ok: true, data: { ticketId: row.id } };
 }

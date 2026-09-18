@@ -4,19 +4,28 @@ import { Html5QrcodeScanner } from "html5-qrcode";
 import { useEffect, useRef, useState } from "react";
 import { StatusBadge } from "@/components/status-badge";
 
+type VerifiedPerson = {
+  grado: string;
+  apellidos: string;
+  nombres: string;
+  cip: string;
+  pagado: boolean;
+};
+
 type ScanResult =
-  | { status: "verified" }
+  | { status: "verified"; person: VerifiedPerson }
   | {
       status: "already-verified";
       verifiedAt: string | null;
       stationLabel: string | null;
+      person: VerifiedPerson;
     }
   | { status: "error"; message: string };
 
 const CONTAINER_ID = "qr-reader";
 // How long a result stays on screen before the panel clears itself, so the frame looks
 // "ready" again for the next scan instead of showing a stale result indefinitely.
-const RESULT_DISPLAY_MS = 3500;
+const RESULT_DISPLAY_MS = 5000;
 
 export function QrScanner() {
   const [result, setResult] = useState<ScanResult | null>(null);
@@ -83,10 +92,11 @@ export function QrScanner() {
                 status: "already-verified",
                 verifiedAt: body.data.verifiedAt,
                 stationLabel: body.data.stationLabel,
+                person: body.data.person,
               });
               flashRing("danger");
             } else {
-              setResult({ status: "verified" });
+              setResult({ status: "verified", person: body.data.person });
               flashRing("success");
             }
           } catch {
@@ -157,17 +167,19 @@ export function QrScanner() {
         {result?.status === "verified" && (
           <div
             role="alert"
-            className="animate-pop-in flex min-h-14 items-center justify-center gap-2 rounded-xl border border-success/30 bg-success/10 p-4"
+            className="animate-pop-in flex flex-col items-center gap-3 rounded-xl border border-success/30 bg-success/10 p-4"
           >
             <StatusBadge variant="verified" />
+            <PersonSummary person={result.person} />
           </div>
         )}
         {result?.status === "already-verified" && (
           <div
             role="alert"
-            className="animate-pop-in flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl border border-danger/30 bg-danger/10 p-4"
+            className="animate-pop-in flex flex-col items-center gap-3 rounded-xl border border-danger/30 bg-danger/10 p-4"
           >
             <StatusBadge variant="danger" />
+            <PersonSummary person={result.person} />
             {result.stationLabel && (
               <p className="text-sm text-muted-foreground">
                 Verificado antes en {result.stationLabel}
@@ -183,6 +195,25 @@ export function QrScanner() {
             {result.message}
           </div>
         )}
+      </div>
+    </div>
+  );
+}
+
+// Shown on every successful scan (first-time and already-used alike) — the station needs to see
+// whose ticket this is to check it against the person standing in front of them, not just a
+// pass/fail badge.
+function PersonSummary({ person }: { person: VerifiedPerson }) {
+  return (
+    <div className="animate-fade-in-delay-1 text-center">
+      <p className="font-medium">
+        {person.grado} — {person.apellidos}, {person.nombres}
+      </p>
+      <p className="text-sm tabular-nums text-muted-foreground">
+        CIP {person.cip}
+      </p>
+      <div className="mt-2 flex justify-center">
+        <StatusBadge variant={person.pagado ? "paid" : "unpaid"} />
       </div>
     </div>
   );

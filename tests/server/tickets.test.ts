@@ -1,4 +1,4 @@
-import { sql } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { beforeEach, describe, expect, it } from "vitest";
 import { db } from "@/db/client";
 import { lookupAttempt, personnel, ticket } from "@/db/schema";
@@ -80,6 +80,26 @@ describe("registerByCredentials", () => {
     expect(result).toEqual({
       ok: false,
       error: { code: "CONSENT_REQUIRED", message: expect.any(String) },
+    });
+    const rows = await db.select().from(ticket);
+    expect(rows).toHaveLength(0);
+  });
+
+  it("rejects registration for a valid cip+dni when pagado is false, and creates no ticket", async () => {
+    await db
+      .update(personnel)
+      .set({ pagado: false })
+      .where(eq(personnel.cip, PERSON.cip));
+
+    const result = await registerByCredentials({
+      cip: PERSON.cip,
+      dni: PERSON.dni,
+      consent: true,
+    });
+
+    expect(result).toEqual({
+      ok: false,
+      error: { code: "PAYMENT_REQUIRED", message: expect.any(String) },
     });
     const rows = await db.select().from(ticket);
     expect(rows).toHaveLength(0);
