@@ -2,6 +2,7 @@
 
 import { Html5QrcodeScanner } from "html5-qrcode";
 import { useEffect, useRef, useState } from "react";
+import { StatusBadge } from "@/components/status-badge";
 
 type ScanResult =
   | { status: "verified" }
@@ -64,16 +65,43 @@ export function QrScanner() {
   }, []);
 
   return (
-    <div>
-      <div id={CONTAINER_ID} />
-      {result?.status === "verified" && <p role="alert">Verificado</p>}
-      {result?.status === "already-verified" && (
-        <p role="alert">
-          Ya verificado antes
-          {result.stationLabel ? ` en ${result.stationLabel}` : ""}.
-        </p>
-      )}
-      {result?.status === "error" && <p role="alert">{result.message}</p>}
+    <div className="mx-auto max-w-md px-4">
+      <div
+        id={CONTAINER_ID}
+        className="overflow-hidden rounded-xl border border-border"
+      />
+
+      <div className="mt-4 min-h-14" aria-live="assertive">
+        {result?.status === "verified" && (
+          <div
+            role="alert"
+            className="flex min-h-14 items-center justify-center gap-2 rounded-xl border border-success/30 bg-success/10 p-4"
+          >
+            <StatusBadge variant="verified" />
+          </div>
+        )}
+        {result?.status === "already-verified" && (
+          <div
+            role="alert"
+            className="flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl border border-danger/30 bg-danger/10 p-4"
+          >
+            <StatusBadge variant="danger" />
+            {result.stationLabel && (
+              <p className="text-sm text-muted-foreground">
+                Verificado antes en {result.stationLabel}
+              </p>
+            )}
+          </div>
+        )}
+        {result?.status === "error" && (
+          <div
+            role="alert"
+            className="flex min-h-14 items-center justify-center rounded-xl border border-danger/30 bg-danger/10 p-4 text-danger"
+          >
+            {result.message}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

@@ -2,6 +2,10 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
+import {
+  StatusBadge,
+  type StatusBadgeVariant,
+} from "@/components/status-badge";
 
 // Mirrors src/server/stats.ts's AttendanceRow — not imported directly, because src/components/**
 // must never import src/server/** (see CLAUDE.md's Boundaries table). The dashboard page (a
@@ -39,15 +43,27 @@ export function LiveAttendanceCounter() {
   const total = data?.ok ? data.data.total : null;
 
   return (
-    <div role="status" aria-live="polite">
-      <p style={{ fontVariantNumeric: "tabular-nums" }}>
-        {verified ?? "…"} / {total ?? "…"} verificados
+    <div
+      role="status"
+      aria-live="polite"
+      className="rounded-xl border border-border bg-surface p-4"
+    >
+      <p className="text-sm text-muted-foreground">Verificados en vivo</p>
+      <p className="text-3xl font-semibold tabular-nums">
+        {verified ?? "…"} / {total ?? "…"}
       </p>
     </div>
   );
 }
 
-const STATUS_LABEL: Record<AttendanceRow["status"], string> = {
+const ROW_STATUS_VARIANT: Record<AttendanceRow["status"], StatusBadgeVariant> =
+  {
+    verified: "verified",
+    issued: "pending",
+    "sin-registrar": "pending",
+  };
+
+const ROW_STATUS_LABEL: Record<AttendanceRow["status"], string> = {
   verified: "Verificado",
   issued: "Pendiente",
   "sin-registrar": "Sin registrar",
@@ -70,55 +86,76 @@ export function AttendanceTable({ rows }: { rows: AttendanceRow[] }) {
   });
 
   return (
-    <div>
-      <div>
-        <label htmlFor="attendance-search">Buscar</label>
-        <input
-          id="attendance-search"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Nombre o CIP"
-        />
+    <div className="mt-6">
+      <div className="mb-4 flex flex-wrap items-end gap-4">
+        <div>
+          <label
+            htmlFor="attendance-search"
+            className="block text-sm font-medium"
+          >
+            Buscar
+          </label>
+          <input
+            id="attendance-search"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Nombre o CIP"
+            className="mt-1 h-11 rounded-lg border border-border bg-surface px-3"
+          />
+        </div>
 
-        <label htmlFor="attendance-status">Estado</label>
-        <select
-          id="attendance-status"
-          value={statusFilter}
-          onChange={(e) =>
-            setStatusFilter(e.target.value as AttendanceRow["status"] | "all")
-          }
-        >
-          <option value="all">Todos</option>
-          <option value="verified">Verificado</option>
-          <option value="issued">Pendiente</option>
-          <option value="sin-registrar">Sin registrar</option>
-        </select>
+        <div>
+          <label
+            htmlFor="attendance-status"
+            className="block text-sm font-medium"
+          >
+            Estado
+          </label>
+          <select
+            id="attendance-status"
+            value={statusFilter}
+            onChange={(e) =>
+              setStatusFilter(e.target.value as AttendanceRow["status"] | "all")
+            }
+            className="mt-1 h-11 rounded-lg border border-border bg-surface px-3"
+          >
+            <option value="all">Todos</option>
+            <option value="verified">Verificado</option>
+            <option value="issued">Pendiente</option>
+            <option value="sin-registrar">Sin registrar</option>
+          </select>
+        </div>
       </div>
 
-      <table>
-        <thead>
-          <tr>
-            <th>Grado</th>
-            <th>Apellidos y nombres</th>
-            <th>CIP</th>
-            <th>Estado</th>
-          </tr>
-        </thead>
-        <tbody>
-          {filtered.map((row) => (
-            <tr key={row.personnelId}>
-              <td>{row.grado}</td>
-              <td>
-                {row.apellidos}, {row.nombres}
-              </td>
-              <td style={{ fontVariantNumeric: "tabular-nums" }}>{row.cip}</td>
-              <td>
-                <span>{STATUS_LABEL[row.status]}</span>
-              </td>
+      <div className="overflow-x-auto rounded-xl border border-border">
+        <table className="w-full text-left text-sm">
+          <thead className="bg-surface">
+            <tr>
+              <th className="p-3">Grado</th>
+              <th className="p-3">Apellidos y nombres</th>
+              <th className="p-3">CIP</th>
+              <th className="p-3">Estado</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {filtered.map((row) => (
+              <tr key={row.personnelId} className="border-t border-border">
+                <td className="p-3">{row.grado}</td>
+                <td className="p-3">
+                  {row.apellidos}, {row.nombres}
+                </td>
+                <td className="p-3 tabular-nums">{row.cip}</td>
+                <td className="p-3">
+                  <StatusBadge
+                    variant={ROW_STATUS_VARIANT[row.status]}
+                    label={ROW_STATUS_LABEL[row.status]}
+                  />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

@@ -25,35 +25,52 @@ export default async function RegistroPage({
     : [];
 
   return (
-    <main>
-      <h1>Registra tu ticket</h1>
+    <main className="mx-auto min-h-dvh max-w-md px-4 py-8">
+      <h1 className="text-xl">Registra tu ticket</h1>
 
-      <form method="get">
-        <label htmlFor="q">Apellidos y nombres</label>
-        <input
-          id="q"
-          name="q"
-          defaultValue={query}
-          placeholder="Busca tu nombre"
-        />
-        <button type="submit">Buscar</button>
+      <form method="get" className="mt-4 flex gap-2">
+        <div className="flex-1">
+          <label htmlFor="q" className="block text-sm font-medium">
+            Apellidos y nombres
+          </label>
+          <input
+            id="q"
+            name="q"
+            defaultValue={query}
+            placeholder="Busca tu nombre"
+            className="mt-1 h-14 w-full rounded-lg border border-border bg-surface px-3 text-base"
+          />
+        </div>
+        <button
+          type="submit"
+          className="mt-6 h-14 rounded-lg border border-border bg-surface px-4 font-medium"
+        >
+          Buscar
+        </button>
       </form>
 
       {query && matches.length === 0 && (
-        <p>No encontramos a nadie con ese nombre en el listado.</p>
+        <p className="mt-4 text-sm text-muted-foreground">
+          No encontramos a nadie con ese nombre en el listado.
+        </p>
       )}
 
       {matches.length > 0 && (
-        <ul>
+        <ul className="mt-4 flex flex-col gap-2">
           {matches.map((person) => (
-            <li key={person.id}>
+            <li
+              key={person.id}
+              className="rounded-lg border border-border bg-surface p-3 text-sm"
+            >
               {person.grado} — {person.apellidos}, {person.nombres}
             </li>
           ))}
         </ul>
       )}
 
-      <RegistroForm />
+      <div className="mt-8">
+        <RegistroForm />
+      </div>
     </main>
   );
 }

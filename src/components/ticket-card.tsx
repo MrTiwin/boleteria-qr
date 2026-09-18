@@ -39,23 +39,37 @@ export function TicketCard({
   }
 
   return (
-    <div>
-      <div ref={cardRef}>
+    <div className="mx-auto max-w-md">
+      <div
+        ref={cardRef}
+        className="rounded-xl border border-border bg-surface p-6 text-center"
+      >
         {/* biome-ignore lint/performance/noImgElement: a QR data URL generated server-side per request isn't a candidate for next/image's remote optimization pipeline. */}
         <img
           src={qrDataUrl}
           alt={`Código QR del ticket de ${nombres} ${apellidos}`}
           width={480}
           height={480}
+          className="mx-auto h-auto w-full max-w-72"
         />
-        <p>
+        <p className="mt-4 font-medium">
           {grado} — {apellidos}, {nombres}
         </p>
-        <p>CIP {cip}</p>
-        <p role="alert">Código personal e intransferible bajo sanción.</p>
+        <p className="text-sm tabular-nums text-muted-foreground">CIP {cip}</p>
+        <p
+          role="alert"
+          className="mt-3 rounded-lg border border-danger/30 bg-danger/10 p-2 text-sm text-danger"
+        >
+          Código personal e intransferible bajo sanción.
+        </p>
       </div>
 
-      <button type="button" onClick={handleDownload} disabled={downloading}>
+      <button
+        type="button"
+        onClick={handleDownload}
+        disabled={downloading}
+        className="mt-4 h-14 w-full rounded-lg bg-primary px-4 font-medium text-primary-foreground disabled:opacity-60"
+      >
         {downloading ? "Descargando..." : "Descargar como imagen"}
       </button>
     </div>

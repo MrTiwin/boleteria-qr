@@ -12,17 +12,45 @@ export function MiTicketForm() {
   );
 
   return (
-    <form action={formAction}>
-      <label htmlFor="cip">CIP</label>
-      <input id="cip" name="cip" inputMode="numeric" required />
+    <form action={formAction} className="flex flex-col gap-4">
+      <div>
+        <label htmlFor="cip" className="block text-sm font-medium">
+          CIP
+        </label>
+        <input
+          id="cip"
+          name="cip"
+          inputMode="numeric"
+          required
+          className="mt-1 h-14 w-full rounded-lg border border-border bg-surface px-3 text-base tabular-nums"
+        />
+      </div>
 
-      <label htmlFor="dni">DNI</label>
-      <input id="dni" name="dni" inputMode="numeric" required />
+      <div>
+        <label htmlFor="dni" className="block text-sm font-medium">
+          DNI
+        </label>
+        <input
+          id="dni"
+          name="dni"
+          inputMode="numeric"
+          required
+          className="mt-1 h-14 w-full rounded-lg border border-border bg-surface px-3 text-base tabular-nums"
+        />
+      </div>
 
-      {state.error && <p role="alert">{state.error.message}</p>}
+      {state.error && (
+        <p role="alert" className="text-sm text-danger">
+          {state.error.message}
+        </p>
+      )}
 
-      <button type="submit" disabled={pending}>
-        Buscar mi ticket
+      <button
+        type="submit"
+        disabled={pending}
+        className="h-14 rounded-lg bg-primary px-4 font-medium text-primary-foreground disabled:opacity-60"
+      >
+        {pending ? "Buscando..." : "Buscar mi ticket"}
       </button>
     </form>
   );

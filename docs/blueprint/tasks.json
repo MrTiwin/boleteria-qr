@@ -302,6 +302,9 @@
     ],
     "status": "in_progress",
     "note": "Code complete, tsc/biome pass. Both tests hit the usual ECONNREFUSED (beforeEach seeds an admin user). Reuses getAttendanceRows() from E2-T3's src/server/stats.ts rather than re-querying — one source of truth for 'what a row of attendance means'. CSV fields are minimally escaped (quote-wrap on comma/quote/newline) since names can contain commas in principle. Also added an 'Exportar CSV' link to the admin dashboard page (src/app/(admin)/admin/page.tsx) for usability, not required by the acceptance criteria."
+  },
+  {
+    "id": "E2-T5",
     "title": "Sistema de diseño aplicado + responsive + accesibilidad",
     "epic": "02-estaciones-dashboard",
     "dependencies": ["E2-T3", "E1-T7", "E2-T2"],
@@ -320,7 +323,8 @@
       "package.json",
       "tests/e2e/accessibility.spec.ts"
     ],
-    "status": "pending"
+    "status": "done",
+    "note": "Verified for real: 5/5 Playwright tests passed against a full `pnpm build && pnpm start` run (0 axe violations on /registro, /mi-ticket, /verificar; no horizontal scroll at 375px; status badge has icon+text). Two real bugs found and fixed by running this: (1) src/app/(admin)/admin/page.tsx has no dynamic API of its own, so Next.js tried to statically prerender it at build time and crashed on the unreachable DATABASE_URL — fixed with `export const dynamic = 'force-dynamic'`, which is also just correct for an auth-gated, always-live page. (2) The status-badge test tried to renderToStaticMarkup() the real component from inside the Playwright spec, but Playwright's own TSX loader injects a JSX runtime meant for its component-testing harness, producing objects react-dom/server can't render — fixed by rendering it in a separate `tsx` child process (scripts/render-status-badge.ts) instead, so the test exercises the real component rather than a hand-copied HTML approximation. Applied the design system tokens from CLAUDE.md across globals.css and every page/component built in E1/E2 so far (Tailwind classes, 56px+ touch targets, focus-visible rings, prefers-reduced-motion). Added scripts/render-status-badge.ts (not in original files list)."
   },
   {
     "id": "E2-T6",

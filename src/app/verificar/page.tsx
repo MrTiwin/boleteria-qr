@@ -9,9 +9,11 @@ export default async function VerificarPage() {
   }
 
   return (
-    <main>
-      <h1>Escanear ticket</h1>
-      <QrScanner />
+    <main className="min-h-dvh px-4 py-8">
+      <h1 className="mx-auto max-w-md text-xl">Escanear ticket</h1>
+      <div className="mt-4">
+        <QrScanner />
+      </div>
     </main>
   );
 }
