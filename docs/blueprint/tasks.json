@@ -249,7 +249,8 @@
       "src/components/qr-scanner.tsx",
       "tests/server/verify-concurrency.test.ts"
     ],
-    "status": "pending"
+    "status": "in_progress",
+    "note": "CRITICAL — the whole anti-double-scan guarantee is unverified. Code complete, tsc/biome pass, and the implementation matches .claude/rules/verification.md exactly: one conditional UPDATE (WHERE id=... AND status='issued') inside a transaction, checked by rowCount, extra SELECT only on the already-verified branch, HMAC checked before any DB call. But all 4 tests — including the 10-concurrent-request race test, the single most important test in this entire project — hit the usual ECONNREFUSED and have NEVER been run against a real Postgres. Do not trust this task's correctness from code review alone; run `pnpm exec vitest run tests/server/verify-concurrency.test.ts` against a real database before the event, specifically the concurrency test."
   },
   {
     "id": "E2-T3",
