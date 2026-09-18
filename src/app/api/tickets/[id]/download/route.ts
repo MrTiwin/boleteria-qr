@@ -12,7 +12,8 @@ export async function POST(
   const result = await recordTicketDownload(id, ip);
 
   if (!result.ok) {
-    return NextResponse.json(result, { status: 404 });
+    const status = result.error.code === "RATE_LIMITED" ? 429 : 404;
+    return NextResponse.json(result, { status });
   }
 
   return NextResponse.json(result);

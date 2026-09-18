@@ -1,10 +1,13 @@
 import "server-only";
 import { randomInt } from "node:crypto";
 import { hashPassword, verifyPassword } from "better-auth/crypto";
-import { eq } from "drizzle-orm";
+import { and, count, eq, gt } from "drizzle-orm";
 import { db } from "@/db/client";
-import { verificationStation } from "@/db/schema";
+import { stationLoginAttempt, verificationStation } from "@/db/schema";
 import type { ActionResult } from "@/server/tickets";
+
+const LOGIN_WINDOW_MS = 60 * 60 * 1000;
+const MAX_LOGIN_ATTEMPTS_PER_WINDOW = 10;
 
 // Excludes visually-ambiguous characters (0/O, 1/I) — these codes get read aloud and typed by
 // hand at the door.
@@ -58,9 +61,34 @@ export async function activateStation(stationId: string): Promise<void> {
 // Linear scan over active stations only — there are 6-8 of them, and codes are hashed, so there
 // is no indexed lookup available. A deactivated station's code never matches here, even if it is
 // otherwise correct, because the WHERE clause excludes it before any hash comparison runs.
+//
+// Rate-limited by IP (not by the attempted code itself, which is short-lived and per-station) —
+// defense-in-depth on top of the codes' own large keyspace (32^8 combinations).
 export async function verifyStationCode(
   code: string,
+  ip: string,
 ): Promise<ActionResult<{ stationId: string; label: string }>> {
+  const since = new Date(Date.now() - LOGIN_WINDOW_MS);
+  const [recent] = await db
+    .select({ value: count() })
+    .from(stationLoginAttempt)
+    .where(
+      and(
+        eq(stationLoginAttempt.ip, ip),
+        gt(stationLoginAttempt.createdAt, since),
+      ),
+    );
+
+  if ((recent?.value ?? 0) >= MAX_LOGIN_ATTEMPTS_PER_WINDOW) {
+    return {
+      ok: false,
+      error: {
+        code: "RATE_LIMITED",
+        message: "Demasiados intentos. Intenta de nuevo más tarde.",
+      },
+    };
+  }
+
   const activeStations = await db
     .select()
     .from(verificationStation)
@@ -74,6 +102,8 @@ export async function verifyStationCode(
       };
     }
   }
+
+  await db.insert(stationLoginAttempt).values({ ip });
 
   return {
     ok: false,

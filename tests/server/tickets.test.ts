@@ -1,7 +1,7 @@
 import { sql } from "drizzle-orm";
 import { beforeEach, describe, expect, it } from "vitest";
 import { db } from "@/db/client";
-import { personnel, ticket } from "@/db/schema";
+import { lookupAttempt, personnel, ticket } from "@/db/schema";
 import { registerByCredentials } from "@/server/tickets";
 
 const PERSON = {
@@ -16,6 +16,7 @@ const PERSON = {
 beforeEach(async () => {
   await db.execute(sql`delete from ${ticket}`);
   await db.execute(sql`delete from ${personnel}`);
+  await db.execute(sql`delete from ${lookupAttempt}`);
   await db.insert(personnel).values(PERSON);
 });
 
@@ -79,6 +80,29 @@ describe("registerByCredentials", () => {
     expect(result).toEqual({
       ok: false,
       error: { code: "CONSENT_REQUIRED", message: expect.any(String) },
+    });
+    const rows = await db.select().from(ticket);
+    expect(rows).toHaveLength(0);
+  });
+
+  it("rate-limits repeated wrong-dni attempts for the same cip, same as /mi-ticket", async () => {
+    for (let i = 0; i < 5; i++) {
+      await registerByCredentials({
+        cip: PERSON.cip,
+        dni: "00000000",
+        consent: true,
+      });
+    }
+
+    const result = await registerByCredentials({
+      cip: PERSON.cip,
+      dni: PERSON.dni, // even the correct dni is rejected once rate-limited
+      consent: true,
+    });
+
+    expect(result).toEqual({
+      ok: false,
+      error: { code: "RATE_LIMITED", message: expect.any(String) },
     });
     const rows = await db.select().from(ticket);
     expect(rows).toHaveLength(0);

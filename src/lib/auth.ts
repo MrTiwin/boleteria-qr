@@ -30,6 +30,14 @@ export const auth = betterAuth({
       },
     },
   },
+  // Explicit rather than relying on Better Auth's implicit `enabled: isProduction` default —
+  // this makes the protection visible in this file instead of depending on how NODE_ENV happens
+  // to be set on whatever host runs this. Once enabled, Better Auth's own built-in special rule
+  // throttles every /sign-in* path to 3 requests per 10s regardless of the general window/max
+  // below — that's the actual brute-force protection on the admin login form.
+  rateLimit: {
+    enabled: true,
+  },
   // Must be last in the plugins array (Better Auth's own requirement). Without it, calling
   // auth.api.signInEmail from a server action returns a session but never sets the browser's
   // cookie — this hooks the API so a server action's response cookies are applied via

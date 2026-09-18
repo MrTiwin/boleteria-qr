@@ -1,5 +1,6 @@
 "use server";
 
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { setStationSessionCookie } from "@/lib/station-session";
 import { verifyStationCode } from "@/server/stations";
@@ -23,7 +24,10 @@ export async function stationLoginAction(
     };
   }
 
-  const result = await verifyStationCode(code);
+  const requestHeaders = await headers();
+  const ip =
+    requestHeaders.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+  const result = await verifyStationCode(code, ip);
 
   if (!result.ok) {
     return { error: result.error };

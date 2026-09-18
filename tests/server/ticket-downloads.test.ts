@@ -63,6 +63,26 @@ describe("recordTicketDownload", () => {
     expect(logs).toHaveLength(3);
   });
 
+  it("rate-limits after 10 downloads of the same ticket within the window", async () => {
+    const created = await createOrGetTicket(personnelId);
+
+    for (let i = 0; i < 10; i++) {
+      await recordTicketDownload(created.id, "203.0.113.7");
+    }
+
+    const result = await recordTicketDownload(created.id, "203.0.113.7");
+
+    expect(result).toEqual({
+      ok: false,
+      error: { code: "RATE_LIMITED", message: expect.any(String) },
+    });
+    const [row] = await db
+      .select()
+      .from(ticket)
+      .where(eq(ticket.id, created.id));
+    expect(row.downloadCount).toBe(10);
+  });
+
   it("returns NOT_FOUND and writes no row for a nonexistent ticket id", async () => {
     const result = await recordTicketDownload(
       "00000000-0000-0000-0000-000000000000",

@@ -153,3 +153,14 @@ export const lookupAttempt = pgTable("lookup_attempt", {
     .notNull()
     .defaultNow(),
 });
+
+// One row per failed station-code login attempt, keyed by IP rather than the attempted code
+// itself — the code is short-lived and per-station, not a stable identity to key a rate limit on.
+// Read by src/server/stations.ts with a one-hour window.
+export const stationLoginAttempt = pgTable("station_login_attempt", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  ip: text("ip").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
