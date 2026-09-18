@@ -84,7 +84,8 @@
       "scripts/seed-admin.ts",
       "tests/lib/auth.test.ts"
     ],
-    "status": "pending"
+    "status": "in_progress",
+    "note": "Code complete, tsc/biome pass. 1/4 tests verified for real (proxy config.matcher — no DB). The other 3 (seed idempotency, valid sign-in, invalid sign-in) hit the same ECONNREFUSED environment blocker as E1-T1/E1-T2. Also added src/lib/admin-seed.ts (not in the original files list): auth.disableSignUp is true (no public signup route, per the internal-tool shape), which is real and verified — auth.api.signUpEmail throws EMAIL_PASSWORD_SIGN_UP_DISABLED even from server code, so the seed script writes user+account rows directly using better-auth/crypto's hashPassword instead of calling the disabled API. Run the full suite against a real Postgres before marking done."
   },
   {
     "id": "E1-T4",
