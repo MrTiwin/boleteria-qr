@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useState } from "react";
+import { PaymentRequiredDialog } from "@/components/payment-required-dialog";
 import { type RegistroActionState, registroAction } from "./actions";
 
 const initialState: RegistroActionState = { error: null };
@@ -10,6 +11,13 @@ export function RegistroForm() {
     registroAction,
     initialState,
   );
+  const [showPaymentDialog, setShowPaymentDialog] = useState(false);
+
+  useEffect(() => {
+    if (state.error?.code === "PAYMENT_REQUIRED") {
+      setShowPaymentDialog(true);
+    }
+  }, [state.error]);
 
   return (
     <form action={formAction} className="flex flex-col gap-4">
@@ -52,7 +60,7 @@ export function RegistroForm() {
         </span>
       </label>
 
-      {state.error && (
+      {state.error && state.error.code !== "PAYMENT_REQUIRED" && (
         <p role="alert" className="text-sm text-danger">
           {state.error.message}
         </p>
@@ -65,6 +73,13 @@ export function RegistroForm() {
       >
         {pending ? "Generando..." : "Generar mi ticket QR"}
       </button>
+
+      {showPaymentDialog && state.error?.code === "PAYMENT_REQUIRED" && (
+        <PaymentRequiredDialog
+          message={state.error.message}
+          onClose={() => setShowPaymentDialog(false)}
+        />
+      )}
     </form>
   );
 }
