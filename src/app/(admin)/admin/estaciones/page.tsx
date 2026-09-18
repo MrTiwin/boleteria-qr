@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { db } from "@/db/client";
 import { verificationStation } from "@/db/schema";
 import {
@@ -5,6 +6,7 @@ import {
   deactivateStationAction,
   rotateStationCodeAction,
 } from "./actions";
+import { CopyCodeButton } from "./copy-code-button";
 
 export default async function EstacionesPage({
   searchParams,
@@ -16,19 +18,29 @@ export default async function EstacionesPage({
 
   return (
     <main className="mx-auto min-h-dvh max-w-2xl px-4 py-8">
-      <h1 className="font-fraunces text-2xl font-semibold">
+      <Link
+        href="/admin"
+        className="inline-flex items-center gap-1 text-sm text-muted-foreground transition-colors duration-150 hover:text-primary"
+      >
+        ← Volver al dashboard
+      </Link>
+
+      <h1 className="mt-2 text-2xl font-semibold">
         Estaciones de verificación
       </h1>
 
       {newCode && (
-        <p
+        <div
           role="alert"
-          className="mt-4 rounded-lg border border-primary bg-surface p-4 text-sm"
+          className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-primary bg-surface p-4 text-sm"
         >
-          Código para {label}:{" "}
-          <strong className="tabular-nums">{newCode}</strong> — anótalo ahora,
-          no se vuelve a mostrar.
-        </p>
+          <p>
+            Código para {label}:{" "}
+            <strong className="tabular-nums">{newCode}</strong> — anótalo ahora,
+            no se vuelve a mostrar.
+          </p>
+          <CopyCodeButton code={newCode} />
+        </div>
       )}
 
       <form

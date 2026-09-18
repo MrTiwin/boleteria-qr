@@ -9,7 +9,7 @@ export default function AdminLoginPage() {
         alt="Escudo SCYTE"
         className="mx-auto h-14 w-auto"
       />
-      <h1 className="mt-3 text-center font-fraunces text-2xl font-semibold">
+      <h1 className="mt-3 text-center text-2xl font-semibold">
         Panel de administración
       </h1>
       <p className="mt-1 text-center text-sm text-muted-foreground">

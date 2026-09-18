@@ -17,7 +17,7 @@ export default async function AdminDashboardPage() {
     <main className="mx-auto min-h-dvh max-w-4xl px-4 py-8">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="font-fraunces text-2xl font-semibold">Dashboard</h1>
+          <h1 className="text-2xl font-semibold">Dashboard</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             Asistencia en vivo al almuerzo de camaradería.
           </p>
