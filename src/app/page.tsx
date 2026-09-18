@@ -30,6 +30,15 @@ export default function Home() {
           Ver mi ticket
         </Link>
       </p>
+
+      <p className="mt-12 text-center text-xs text-muted-foreground">
+        <Link
+          href="/login"
+          className="underline underline-offset-2 transition-colors duration-150 hover:text-primary"
+        >
+          Acceso administrativo
+        </Link>
+      </p>
     </main>
   );
 }
