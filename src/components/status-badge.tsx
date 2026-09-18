@@ -5,9 +5,14 @@ const VARIANTS = {
     Icon: CheckIcon,
   },
   pending: {
-    label: "Pendiente",
+    label: "Registrado",
     className: "bg-primary/10 text-primary border-primary/30",
     Icon: ClockIcon,
+  },
+  unregistered: {
+    label: "Sin registrar",
+    className: "bg-secondary/10 text-secondary border-secondary/30",
+    Icon: DashIcon,
   },
   danger: {
     label: "Ya usado",
@@ -77,6 +82,21 @@ function ClockIcon(props: React.SVGProps<SVGSVGElement>) {
       <title>Pendiente</title>
       <circle cx="10" cy="10" r="7" />
       <path d="M10 6v4l3 2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function DashIcon(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      viewBox="0 0 20 20"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      {...props}
+    >
+      <title>Sin registrar</title>
+      <circle cx="10" cy="10" r="7" strokeDasharray="2.5 2.5" />
     </svg>
   );
 }

@@ -62,21 +62,23 @@ const ROW_STATUS_VARIANT: Record<AttendanceRow["status"], StatusBadgeVariant> =
   {
     verified: "verified",
     issued: "pending",
-    "sin-registrar": "pending",
+    "sin-registrar": "unregistered",
   };
 
 const ROW_STATUS_LABEL: Record<AttendanceRow["status"], string> = {
   verified: "Verificado",
-  issued: "Pendiente",
+  issued: "Registrado",
   "sin-registrar": "Sin registrar",
 };
 
 export function AttendanceTable({
   rows,
   isAdmin = false,
+  onResetTicket,
 }: {
   rows: AttendanceRow[];
   isAdmin?: boolean;
+  onResetTicket?: (formData: FormData) => void | Promise<void>;
 }) {
   const [statusFilter, setStatusFilter] = useState<
     AttendanceRow["status"] | "all"
@@ -133,7 +135,7 @@ export function AttendanceTable({
           >
             <option value="all">Todos</option>
             <option value="verified">Verificado</option>
-            <option value="issued">Pendiente</option>
+            <option value="issued">Registrado</option>
             <option value="sin-registrar">Sin registrar</option>
           </select>
         </div>
@@ -194,13 +196,31 @@ export function AttendanceTable({
                   <StatusBadge variant={row.pagado ? "paid" : "unpaid"} />
                 </td>
                 {isAdmin && (
-                  <td className="p-3 text-right">
-                    <Link
-                      href={`/admin/personal/${row.personnelId}`}
-                      className="text-sm text-primary underline"
-                    >
-                      Editar
-                    </Link>
+                  <td className="p-3">
+                    <div className="flex items-center justify-end gap-3">
+                      <Link
+                        href={`/admin/personal/${row.personnelId}`}
+                        className="text-sm text-primary underline"
+                      >
+                        Editar
+                      </Link>
+                      {row.status !== "sin-registrar" && onResetTicket && (
+                        <form action={onResetTicket}>
+                          <input
+                            type="hidden"
+                            name="personnelId"
+                            value={row.personnelId}
+                          />
+                          <button
+                            type="submit"
+                            title="Borra el ticket para volver a probar el registro"
+                            className="text-sm text-muted-foreground underline decoration-dotted transition-colors duration-150 hover:text-danger"
+                          >
+                            Reiniciar
+                          </button>
+                        </form>
+                      )}
+                    </div>
                   </td>
                 )}
               </tr>

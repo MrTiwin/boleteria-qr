@@ -18,7 +18,6 @@ export const metadata: Metadata = {
   title: "Almuerzo de Confraternidad de Oficiales SCYTE 2026",
   description:
     "Almuerzo de Confraternidad de Oficiales SCYTE 2026 — registro y verificación de asistencia",
-  icons: { icon: "/logo-scyte.png" },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

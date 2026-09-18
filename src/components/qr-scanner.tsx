@@ -156,11 +156,16 @@ export function QrScanner() {
 
   return (
     <div className="mx-auto max-w-md px-4">
-      <div ref={ringElRef} className="rounded-xl">
-        <div
-          id={CONTAINER_ID}
-          className="overflow-hidden rounded-xl border border-border"
-        />
+      <div className="animate-fade-in-delay-1 rounded-2xl border border-border bg-surface p-4 shadow-sm">
+        <p className="mb-3 text-center text-sm text-muted-foreground">
+          Apunta la cámara al código QR del ticket
+        </p>
+        <div ref={ringElRef} className="rounded-xl">
+          <div
+            id={CONTAINER_ID}
+            className="overflow-hidden rounded-xl border border-border"
+          />
+        </div>
       </div>
 
       <div className="mt-4 min-h-14" aria-live="assertive">

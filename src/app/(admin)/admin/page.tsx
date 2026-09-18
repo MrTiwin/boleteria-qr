@@ -5,6 +5,7 @@ import {
 } from "@/components/attendance-table";
 import { auth } from "@/lib/auth";
 import { getAttendanceRows } from "@/server/stats";
+import { resetTicketFromDashboardAction } from "./actions";
 import { adminLogoutAction } from "./logout-action";
 
 // Protected by src/proxy.ts (matcher: /admin/:path*) and reads live DB state on every request —
@@ -69,7 +70,11 @@ export default async function AdminDashboardPage() {
         <LiveAttendanceCounter />
       </div>
 
-      <AttendanceTable rows={rows} isAdmin={isAdmin} />
+      <AttendanceTable
+        rows={rows}
+        isAdmin={isAdmin}
+        onResetTicket={isAdmin ? resetTicketFromDashboardAction : undefined}
+      />
     </main>
   );
 }
