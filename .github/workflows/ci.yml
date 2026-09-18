@@ -53,6 +53,12 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Generate Next.js route types
+        # tsc fails on layout.tsx's LayoutProps<"/"> without this — those ambient types live
+        # under .next/types and only exist after next dev/build/typegen has run once. A fresh
+        # `pnpm install` alone never produces them. Verified live on GitHub Actions (run #2).
+        run: pnpm exec next typegen
+
       - name: Typecheck
         run: pnpm exec tsc --noEmit
 
