@@ -300,10 +300,8 @@
       "src/server/export.ts",
       "tests/server/export.test.ts"
     ],
-    "status": "pending"
-  },
-  {
-    "id": "E2-T5",
+    "status": "in_progress",
+    "note": "Code complete, tsc/biome pass. Both tests hit the usual ECONNREFUSED (beforeEach seeds an admin user). Reuses getAttendanceRows() from E2-T3's src/server/stats.ts rather than re-querying — one source of truth for 'what a row of attendance means'. CSV fields are minimally escaped (quote-wrap on comma/quote/newline) since names can contain commas in principle. Also added an 'Exportar CSV' link to the admin dashboard page (src/app/(admin)/admin/page.tsx) for usability, not required by the acceptance criteria."
     "title": "Sistema de diseño aplicado + responsive + accesibilidad",
     "epic": "02-estaciones-dashboard",
     "dependencies": ["E2-T3", "E1-T7", "E2-T2"],

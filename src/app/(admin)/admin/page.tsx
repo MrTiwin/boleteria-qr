@@ -10,6 +10,7 @@ export default async function AdminDashboardPage() {
   return (
     <main>
       <h1>Dashboard</h1>
+      <a href="/api/admin/export">Exportar CSV</a>
       <LiveAttendanceCounter />
       <AttendanceTable rows={rows} />
     </main>
