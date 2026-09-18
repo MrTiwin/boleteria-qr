@@ -4,6 +4,7 @@ import { eq } from "drizzle-orm";
 import { db } from "@/db/client";
 import { personnel, ticket } from "@/db/schema";
 import { signQrToken } from "@/lib/qr-token";
+import { isRateLimited, recordFailedAttempt } from "@/server/rate-limit";
 
 export type ActionResult<T> =
   | { ok: true; data: T }
@@ -56,6 +57,19 @@ export async function registerByCredentials(input: {
     };
   }
 
+  // Same budget as "buscar mi ticket" (src/server/rate-limit.ts) — this check actually creates
+  // a ticket and exposes the matched person's name, so it must never be less protected than the
+  // read-only lookup that shares its credential shape.
+  if (await isRateLimited(input.cip)) {
+    return {
+      ok: false,
+      error: {
+        code: "RATE_LIMITED",
+        message: "Demasiados intentos. Intenta de nuevo más tarde.",
+      },
+    };
+  }
+
   const matches = await db
     .select()
     .from(personnel)
@@ -63,6 +77,7 @@ export async function registerByCredentials(input: {
   const person = matches[0];
 
   if (!person || person.dni !== input.dni) {
+    await recordFailedAttempt(input.cip);
     return {
       ok: false,
       error: {

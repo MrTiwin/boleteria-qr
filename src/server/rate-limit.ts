@@ -7,7 +7,11 @@ import type { ActionResult } from "@/server/tickets";
 const WINDOW_MS = 60 * 60 * 1000;
 const MAX_ATTEMPTS_PER_WINDOW = 5;
 
-async function isRateLimited(cip: string): Promise<boolean> {
+// Shared by both CIP+DNI credential checks in the app — "buscar mi ticket" below, and
+// registration (src/server/tickets.ts). The two write to and read from the same lookup_attempt
+// table/window: a failed attempt on either path counts against the same CIP's budget, since both
+// are the same underlying "guess this person's DNI" attack.
+export async function isRateLimited(cip: string): Promise<boolean> {
   const since = new Date(Date.now() - WINDOW_MS);
   const recentAttempts = await db
     .select()
@@ -17,7 +21,7 @@ async function isRateLimited(cip: string): Promise<boolean> {
   return recentAttempts.length >= MAX_ATTEMPTS_PER_WINDOW;
 }
 
-async function recordFailedAttempt(cip: string): Promise<void> {
+export async function recordFailedAttempt(cip: string): Promise<void> {
   await db.insert(lookupAttempt).values({ cip });
 }
 
