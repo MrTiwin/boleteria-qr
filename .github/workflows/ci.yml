@@ -1,0 +1,63 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:17.6-alpine
+        env:
+          POSTGRES_USER: boleteria
+          POSTGRES_PASSWORD: boleteria_test
+          POSTGRES_DB: boleteria_test
+        ports:
+          - 5433:5432
+        options: >-
+          --health-cmd "pg_isready -U boleteria -d boleteria_test"
+          --health-interval 2s
+          --health-timeout 5s
+          --health-retries 20
+
+    env:
+      DATABASE_URL: postgresql://boleteria:boleteria_test@localhost:5433/boleteria_test
+      TEST_DATABASE_URL: postgresql://boleteria:boleteria_test@localhost:5433/boleteria_test
+      BETTER_AUTH_SECRET: ci-only-secret-32-bytes-minimum-ci-only
+      BETTER_AUTH_URL: http://localhost:3000
+      QR_HMAC_SECRET: ci-only-64-hex-chars-ci-only-64-hex-chars-ci-only-64-hex-chars
+      ADMIN_SEED_EMAIL: admin@ci.example.org
+      ADMIN_SEED_PASSWORD: ci-only-admin-password
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+
+      - name: Enable corepack
+        run: corepack enable --install-directory "$HOME/.local/bin" && echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - run: corepack prepare pnpm@11.17.0 --activate
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck
+        run: pnpm exec tsc --noEmit
+
+      - name: Lint
+        run: pnpm exec biome check .
+
+      - name: Apply migrations to the test database
+        run: pnpm exec drizzle-kit migrate
+
+      - name: Unit tests
+        run: pnpm exec vitest run
+
+      - name: Build
+        run: pnpm build

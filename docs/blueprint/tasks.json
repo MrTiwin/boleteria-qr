@@ -348,6 +348,7 @@
       "src/app/api/health/route.ts",
       "tests/server/health.test.ts"
     ],
-    "status": "pending"
+    "status": "in_progress",
+    "note": "pnpm build verified for real (exit 0, /api/health correctly dynamic — not statically prerendered). pnpm start + GET / verified for real: HTTP 200. GET /api/health verified for real too, but returns 503 {ok:false,error:{code:'DB_UNREACHABLE'}} rather than 200 — the honest and correct result with no Postgres reachable here, and it proves the route degrades gracefully (a caught error, not a crash) rather than actually reaching the { ok:true, data:{db:'ok'} } success path. .github/workflows/ci.yml written with a postgres service container and migrate step, but GitHub Actions itself has never run — no push to a branch it watches has happened from this session. Mark done only after: (1) a real CI run on GitHub Actions is green, and (2) GET /api/health returns the 200 success shape against a real Postgres."
   }
 ]
