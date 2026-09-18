@@ -2,6 +2,7 @@ import "server-only";
 import { count, eq } from "drizzle-orm";
 import { db } from "@/db/client";
 import { personnel, ticket } from "@/db/schema";
+import { compareByGrado } from "@/lib/grados";
 
 export type AdminStats = { verified: number; total: number };
 
@@ -46,14 +47,22 @@ export async function getAttendanceRows(): Promise<AttendanceRow[]> {
     .from(personnel)
     .leftJoin(ticket, eq(ticket.personnelId, personnel.id));
 
-  return rows.map((row) => ({
-    personnelId: row.personnelId,
-    grado: row.grado,
-    apellidos: row.apellidos,
-    nombres: row.nombres,
-    cip: row.cip,
-    pagado: row.pagado,
-    status: row.ticketStatus ?? "sin-registrar",
-    verifiedAt: row.verifiedAt,
-  }));
+  return rows
+    .map(
+      (row): AttendanceRow => ({
+        personnelId: row.personnelId,
+        grado: row.grado,
+        apellidos: row.apellidos,
+        nombres: row.nombres,
+        cip: row.cip,
+        pagado: row.pagado,
+        status: row.ticketStatus ?? "sin-registrar",
+        verifiedAt: row.verifiedAt,
+      }),
+    )
+    .sort(
+      (a, b) =>
+        compareByGrado(a.grado, b.grado) ||
+        a.apellidos.localeCompare(b.apellidos, "es"),
+    );
 }

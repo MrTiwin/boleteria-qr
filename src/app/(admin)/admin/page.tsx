@@ -60,7 +60,7 @@ export default async function AdminDashboardPage() {
         <LiveAttendanceCounter />
       </div>
 
-      <AttendanceTable rows={rows} />
+      <AttendanceTable rows={rows} isAdmin={isAdmin} />
     </main>
   );
 }

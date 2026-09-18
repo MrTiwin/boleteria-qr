@@ -33,6 +33,14 @@ export async function createOrGetTicket(personnelId: string) {
   });
 }
 
+// Deletes the person's ticket outright, rather than resetting its status back to "issued" —
+// their old QR image (already downloaded, possibly already shown at the door) signs the OLD
+// ticket id, so re-activating that same row would let a stale screenshot verify again. Deleting
+// it forces createOrGetTicket to mint a brand-new id (and signature) the next time they register.
+export async function resetTicket(personnelId: string): Promise<void> {
+  await db.delete(ticket).where(eq(ticket.personnelId, personnelId));
+}
+
 export async function registerByCredentials(input: {
   cip: string;
   dni: string;

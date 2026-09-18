@@ -31,6 +31,17 @@ export const registroSchema = z.object({
 
 export type RegistroInput = z.infer<typeof registroSchema>;
 
+export const editPersonnelSchema = z.object({
+  grado: z.string().trim().min(1, "grado is required"),
+  apellidos: z.string().trim().min(1, "apellidos is required"),
+  nombres: z.string().trim().min(1, "nombres is required"),
+  cip: z.string().trim().min(1, "cip is required"),
+  dni: z.string().trim().min(1, "dni is required"),
+  pagado: z.boolean(),
+});
+
+export type EditPersonnelInput = z.infer<typeof editPersonnelSchema>;
+
 export const createHostUserSchema = z.object({
   name: z.string().trim().min(1, "name is required"),
   email: z.string().trim().email("must be a valid email"),

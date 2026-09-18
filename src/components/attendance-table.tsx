@@ -1,11 +1,13 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import Link from "next/link";
 import { useState } from "react";
 import {
   StatusBadge,
   type StatusBadgeVariant,
 } from "@/components/status-badge";
+import { sortGrados } from "@/lib/grados";
 
 // Mirrors src/server/stats.ts's AttendanceRow — not imported directly, because src/components/**
 // must never import src/server/** (see CLAUDE.md's Boundaries table). The dashboard page (a
@@ -69,14 +71,20 @@ const ROW_STATUS_LABEL: Record<AttendanceRow["status"], string> = {
   "sin-registrar": "Sin registrar",
 };
 
-export function AttendanceTable({ rows }: { rows: AttendanceRow[] }) {
+export function AttendanceTable({
+  rows,
+  isAdmin = false,
+}: {
+  rows: AttendanceRow[];
+  isAdmin?: boolean;
+}) {
   const [statusFilter, setStatusFilter] = useState<
     AttendanceRow["status"] | "all"
   >("all");
   const [gradoFilter, setGradoFilter] = useState<string>("all");
   const [query, setQuery] = useState("");
 
-  const grados = [...new Set(rows.map((row) => row.grado))].sort();
+  const grados = sortGrados(rows.map((row) => row.grado));
 
   const filtered = rows.filter((row) => {
     if (statusFilter !== "all" && row.status !== statusFilter) return false;
@@ -161,6 +169,8 @@ export function AttendanceTable({ rows }: { rows: AttendanceRow[] }) {
               <th className="p-3">Apellidos y nombres</th>
               <th className="p-3">CIP</th>
               <th className="p-3">Estado</th>
+              <th className="p-3">Pagado</th>
+              {isAdmin && <th className="p-3" />}
             </tr>
           </thead>
           <tbody>
@@ -180,6 +190,21 @@ export function AttendanceTable({ rows }: { rows: AttendanceRow[] }) {
                     label={ROW_STATUS_LABEL[row.status]}
                   />
                 </td>
+                <td className="p-3">
+                  <span className={row.pagado ? "text-success" : "text-danger"}>
+                    {row.pagado ? "Pagado" : "Debe"}
+                  </span>
+                </td>
+                {isAdmin && (
+                  <td className="p-3 text-right">
+                    <Link
+                      href={`/admin/personal/${row.personnelId}`}
+                      className="text-sm text-primary underline"
+                    >
+                      Editar
+                    </Link>
+                  </td>
+                )}
               </tr>
             ))}
           </tbody>

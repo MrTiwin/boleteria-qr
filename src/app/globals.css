@@ -44,9 +44,81 @@
 }
 
 body {
+  position: relative;
   background: var(--color-background);
   color: var(--color-foreground);
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  overflow-x: hidden;
+}
+
+/* Two soft, slow-drifting blurred blobs behind every page — fixed so they never affect layout or
+   scroll height, and pointer-events:none so they never intercept clicks. Low opacity keeps
+   content contrast unaffected (WCAG text contrast is measured against body, not these). */
+body::before,
+body::after {
+  content: "";
+  position: fixed;
+  z-index: -1;
+  border-radius: 9999px;
+  filter: blur(72px);
+  pointer-events: none;
+  background: var(--color-primary);
+  opacity: 0.1;
+}
+
+body::before {
+  top: -10%;
+  left: -10%;
+  width: 42vmax;
+  height: 42vmax;
+  animation: drift-1 26s ease-in-out infinite alternate;
+}
+
+body::after {
+  bottom: -15%;
+  right: -10%;
+  width: 36vmax;
+  height: 36vmax;
+  background: var(--color-secondary);
+  opacity: 0.08;
+  animation: drift-2 32s ease-in-out infinite alternate;
+}
+
+@keyframes drift-1 {
+  from {
+    transform: translate(0, 0) scale(1);
+  }
+  to {
+    transform: translate(6vmax, 8vmax) scale(1.15);
+  }
+}
+
+@keyframes drift-2 {
+  from {
+    transform: translate(0, 0) scale(1);
+  }
+  to {
+    transform: translate(-5vmax, -6vmax) scale(1.1);
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+/* Fades/slides in once like the other .animate-fade-in-* utilities, then keeps gently floating
+   forever — used on the event logo only. Combines both keyframes in one `animation` shorthand
+   because a second class setting `animation` would just override this one, not add to it. */
+.animate-fade-in-float {
+  animation:
+    fade-in-up 400ms ease-out both,
+    float 4s ease-in-out 400ms infinite;
 }
 
 h1,

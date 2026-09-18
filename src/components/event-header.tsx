@@ -9,7 +9,7 @@ export function EventHeader({ compact = false }: { compact?: boolean }) {
       <img
         src="/logo-scyte.png"
         alt="Escudo SCYTE"
-        className={`animate-fade-in ${compact ? "h-12 w-auto" : "h-20 w-auto"}`}
+        className={`animate-fade-in-float ${compact ? "h-12 w-auto" : "h-20 w-auto"}`}
       />
       <h1
         className={
