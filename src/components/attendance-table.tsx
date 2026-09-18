@@ -73,10 +73,14 @@ export function AttendanceTable({ rows }: { rows: AttendanceRow[] }) {
   const [statusFilter, setStatusFilter] = useState<
     AttendanceRow["status"] | "all"
   >("all");
+  const [gradoFilter, setGradoFilter] = useState<string>("all");
   const [query, setQuery] = useState("");
+
+  const grados = [...new Set(rows.map((row) => row.grado))].sort();
 
   const filtered = rows.filter((row) => {
     if (statusFilter !== "all" && row.status !== statusFilter) return false;
+    if (gradoFilter !== "all" && row.grado !== gradoFilter) return false;
     if (query) {
       const haystack =
         `${row.apellidos} ${row.nombres} ${row.cip}`.toLowerCase();
@@ -123,6 +127,28 @@ export function AttendanceTable({ rows }: { rows: AttendanceRow[] }) {
             <option value="verified">Verificado</option>
             <option value="issued">Pendiente</option>
             <option value="sin-registrar">Sin registrar</option>
+          </select>
+        </div>
+
+        <div>
+          <label
+            htmlFor="attendance-grado"
+            className="block text-sm font-medium"
+          >
+            Grado
+          </label>
+          <select
+            id="attendance-grado"
+            value={gradoFilter}
+            onChange={(e) => setGradoFilter(e.target.value)}
+            className="mt-1 h-11 rounded-lg border border-border bg-surface px-3"
+          >
+            <option value="all">Todos</option>
+            {grados.map((grado) => (
+              <option key={grado} value={grado}>
+                {grado}
+              </option>
+            ))}
           </select>
         </div>
       </div>
