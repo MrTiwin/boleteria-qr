@@ -56,7 +56,8 @@
       "src/lib/schemas.ts",
       "tests/lib/import-personnel.test.ts"
     ],
-    "status": "pending"
+    "status": "in_progress",
+    "note": "Code complete, tsc/biome pass. 3/4 tests pass (pure validation: missing field, duplicate cip, duplicate dni — none of these touch the DB, since importPersonnel validates before opening a transaction). The 4th test (clean import replaces the table) is NOT verified — same ECONNREFUSED environment blocker as E1-T1. CLI script (scripts/import-personnel.ts) not run end-to-end for the same reason. Run the full suite against a real Postgres before marking done."
   },
   {
     "id": "E1-T3",
