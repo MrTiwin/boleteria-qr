@@ -140,7 +140,8 @@
       "src/server/tickets.ts",
       "tests/lib/qr-token.test.ts"
     ],
-    "status": "pending"
+    "status": "in_progress",
+    "note": "Code complete, tsc/biome pass. 3/4 tests verified for real (sign/verify round-trip, tampered signature rejected, malformed token rejected — all pure, no DB). The 4th (createOrGetTicket stores a token that verifies) hits the usual ECONNREFUSED. Uses the qrDataUrl (base64 PNG) embedded directly in the server-rendered page rather than a separate image route — satisfies 'render a PNG QR image generated server-side' without a new route; E1-T6's download-as-image is a distinct client-side concern. ticket.id is now generated in JS (randomUUID) instead of the DB default, since signQrToken needs it before the row exists — this changed createOrGetTicket's insert shape from E1-T4."
   },
   {
     "id": "E1-T6",
