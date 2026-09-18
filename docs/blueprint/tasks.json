@@ -21,8 +21,15 @@
       "pnpm exec vitest run tests/db/client.test.ts"
     ],
     "checkpoint": "step-01-scaffold",
-    "files": ["package.json", "src/db/schema.ts", "src/db/client.ts", "src/lib/env.ts", "tests/db/client.test.ts"],
-    "status": "pending"
+    "files": [
+      "package.json",
+      "src/db/schema.ts",
+      "src/db/client.ts",
+      "src/lib/env.ts",
+      "tests/db/client.test.ts"
+    ],
+    "status": "in_progress",
+    "note": "Code complete, tsc/biome pass, drizzle-kit generate produced drizzle/0000_giant_harpoon.sql. NOT yet verified: drizzle-kit migrate and the db-touching half of tests/db/client.test.ts, because no Postgres was reachable from the builder machine (no local Docker, VPS instance not network-exposed). Also corrected the pinned driver from @neondatabase/serverless (edge/HTTP-only, cannot reach a local or VPS-internal Postgres) to pg — see src/db/client.ts. Run both verify commands against a real Postgres before marking done."
   },
   {
     "id": "E1-T2",
@@ -43,7 +50,12 @@
       "pnpm exec vitest run tests/lib/import-personnel.test.ts"
     ],
     "checkpoint": "step-02-import-personnel",
-    "files": ["src/lib/import-personnel.ts", "scripts/import-personnel.ts", "src/lib/schemas.ts", "tests/lib/import-personnel.test.ts"],
+    "files": [
+      "src/lib/import-personnel.ts",
+      "scripts/import-personnel.ts",
+      "src/lib/schemas.ts",
+      "tests/lib/import-personnel.test.ts"
+    ],
     "status": "pending"
   },
   {
@@ -64,7 +76,13 @@
       "pnpm exec vitest run tests/lib/auth.test.ts"
     ],
     "checkpoint": "step-03-admin-auth",
-    "files": ["src/lib/auth.ts", "src/app/api/auth/[...all]/route.ts", "src/proxy.ts", "scripts/seed-admin.ts", "tests/lib/auth.test.ts"],
+    "files": [
+      "src/lib/auth.ts",
+      "src/app/api/auth/[...all]/route.ts",
+      "src/proxy.ts",
+      "scripts/seed-admin.ts",
+      "tests/lib/auth.test.ts"
+    ],
     "status": "pending"
   },
   {
@@ -85,7 +103,13 @@
       "pnpm exec vitest run tests/server/tickets.test.ts"
     ],
     "checkpoint": "step-04-registro",
-    "files": ["src/server/tickets.ts", "src/app/registro/page.tsx", "src/app/registro/actions.ts", "src/lib/schemas.ts", "tests/server/tickets.test.ts"],
+    "files": [
+      "src/server/tickets.ts",
+      "src/app/registro/page.tsx",
+      "src/app/registro/actions.ts",
+      "src/lib/schemas.ts",
+      "tests/server/tickets.test.ts"
+    ],
     "status": "pending"
   },
   {
@@ -106,7 +130,13 @@
       "pnpm exec vitest run tests/lib/qr-token.test.ts"
     ],
     "checkpoint": "step-05-qr-token",
-    "files": ["src/lib/qr-token.ts", "src/lib/qr-image.ts", "src/app/ticket/[id]/page.tsx", "src/server/tickets.ts", "tests/lib/qr-token.test.ts"],
+    "files": [
+      "src/lib/qr-token.ts",
+      "src/lib/qr-image.ts",
+      "src/app/ticket/[id]/page.tsx",
+      "src/server/tickets.ts",
+      "tests/lib/qr-token.test.ts"
+    ],
     "status": "pending"
   },
   {
@@ -126,7 +156,12 @@
       "pnpm exec vitest run tests/server/ticket-downloads.test.ts"
     ],
     "checkpoint": "step-06-download-log",
-    "files": ["src/components/ticket-card.tsx", "src/app/api/tickets/[id]/download/route.ts", "src/server/ticket-downloads.ts", "tests/server/ticket-downloads.test.ts"],
+    "files": [
+      "src/components/ticket-card.tsx",
+      "src/app/api/tickets/[id]/download/route.ts",
+      "src/server/ticket-downloads.ts",
+      "tests/server/ticket-downloads.test.ts"
+    ],
     "status": "pending"
   },
   {
@@ -146,7 +181,12 @@
       "pnpm exec vitest run tests/server/rate-limit.test.ts"
     ],
     "checkpoint": "step-07-mi-ticket",
-    "files": ["src/server/rate-limit.ts", "src/app/mi-ticket/page.tsx", "src/app/mi-ticket/actions.ts", "tests/server/rate-limit.test.ts"],
+    "files": [
+      "src/server/rate-limit.ts",
+      "src/app/mi-ticket/page.tsx",
+      "src/app/mi-ticket/actions.ts",
+      "tests/server/rate-limit.test.ts"
+    ],
     "status": "pending"
   },
   {
@@ -168,7 +208,13 @@
       "pnpm exec vitest run tests/server/stations.test.ts"
     ],
     "checkpoint": "step-08-stations",
-    "files": ["src/server/stations.ts", "src/lib/station-session.ts", "src/app/(admin)/admin/estaciones/page.tsx", "src/app/(admin)/admin/estaciones/actions.ts", "src/app/verificar/login/page.tsx"],
+    "files": [
+      "src/server/stations.ts",
+      "src/lib/station-session.ts",
+      "src/app/(admin)/admin/estaciones/page.tsx",
+      "src/app/(admin)/admin/estaciones/actions.ts",
+      "src/app/verificar/login/page.tsx"
+    ],
     "status": "pending"
   },
   {
@@ -189,7 +235,13 @@
       "pnpm exec vitest run tests/server/verify-concurrency.test.ts"
     ],
     "checkpoint": "step-09-verify-concurrency",
-    "files": ["src/server/verify.ts", "src/app/api/verify/route.ts", "src/app/verificar/page.tsx", "src/components/qr-scanner.tsx", "tests/server/verify-concurrency.test.ts"],
+    "files": [
+      "src/server/verify.ts",
+      "src/app/api/verify/route.ts",
+      "src/app/verificar/page.tsx",
+      "src/components/qr-scanner.tsx",
+      "tests/server/verify-concurrency.test.ts"
+    ],
     "status": "pending"
   },
   {
@@ -209,7 +261,13 @@
       "pnpm exec vitest run tests/server/stats.test.ts"
     ],
     "checkpoint": "step-10-dashboard",
-    "files": ["src/app/(admin)/login/page.tsx", "src/app/(admin)/admin/page.tsx", "src/app/api/admin/stats/route.ts", "src/components/attendance-table.tsx", "tests/server/stats.test.ts"],
+    "files": [
+      "src/app/(admin)/login/page.tsx",
+      "src/app/(admin)/admin/page.tsx",
+      "src/app/api/admin/stats/route.ts",
+      "src/components/attendance-table.tsx",
+      "tests/server/stats.test.ts"
+    ],
     "status": "pending"
   },
   {
@@ -228,7 +286,11 @@
       "pnpm exec vitest run tests/server/export.test.ts"
     ],
     "checkpoint": "step-11-export",
-    "files": ["src/app/api/admin/export/route.ts", "src/server/export.ts", "tests/server/export.test.ts"],
+    "files": [
+      "src/app/api/admin/export/route.ts",
+      "src/server/export.ts",
+      "tests/server/export.test.ts"
+    ],
     "status": "pending"
   },
   {
@@ -243,11 +305,14 @@
       "WHEN a status badge renders THE SYSTEM SHALL include both a text label and an icon element, never color alone.",
       "WHEN `pnpm exec playwright test tests/e2e/accessibility.spec.ts` runs THE SYSTEM SHALL report 0 failed."
     ],
-    "verify": [
-      "pnpm exec playwright test tests/e2e/accessibility.spec.ts"
-    ],
+    "verify": ["pnpm exec playwright test tests/e2e/accessibility.spec.ts"],
     "checkpoint": "step-12-design-a11y",
-    "files": ["src/app/globals.css", "src/components/status-badge.tsx", "package.json", "tests/e2e/accessibility.spec.ts"],
+    "files": [
+      "src/app/globals.css",
+      "src/components/status-badge.tsx",
+      "package.json",
+      "tests/e2e/accessibility.spec.ts"
+    ],
     "status": "pending"
   },
   {
@@ -267,7 +332,11 @@
       "pnpm exec vitest run tests/server/health.test.ts"
     ],
     "checkpoint": "step-13-ci-deploy-readiness",
-    "files": [".github/workflows/ci.yml", "src/app/api/health/route.ts", "tests/server/health.test.ts"],
+    "files": [
+      ".github/workflows/ci.yml",
+      "src/app/api/health/route.ts",
+      "tests/server/health.test.ts"
+    ],
     "status": "pending"
   }
 ]

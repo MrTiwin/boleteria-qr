@@ -9,3 +9,10 @@ if (!process.env.TEST_DATABASE_URL) {
     "TEST_DATABASE_URL is not set. Run `docker compose up -d test-db` and copy .env.example to .env.",
   );
 }
+
+// src/lib/env.ts and src/db/client.ts read DATABASE_URL, never TEST_DATABASE_URL directly — this
+// is the one place that substitutes the test database for it, so every test exercises the exact
+// same client code path production uses.
+if (!process.env.DATABASE_URL) {
+  process.env.DATABASE_URL = process.env.TEST_DATABASE_URL;
+}
