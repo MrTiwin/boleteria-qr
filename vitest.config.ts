@@ -18,6 +18,13 @@ export default defineConfig({
       "tests/e2e/**",
     ],
     include: ["tests/**/*.test.ts", "src/**/*.test.ts"],
+    // Every DB-touching test file shares one real Postgres database (TEST_DATABASE_URL) and
+    // cleans its own tables in beforeEach with a plain DELETE — there is no per-test transaction
+    // or namespacing. Running test FILES in parallel (vitest's default) lets one file's cleanup
+    // race another file's still-in-flight test against the same tables, surfacing as spurious
+    // foreign-key violations that have nothing to do with the code under test. Serialize files;
+    // tests within a file still share this database sequentially by default.
+    fileParallelism: false,
   },
   resolve: {
     alias: {
