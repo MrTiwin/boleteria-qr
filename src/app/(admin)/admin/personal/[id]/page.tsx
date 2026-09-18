@@ -1,6 +1,7 @@
 import { eq } from "drizzle-orm";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { StatusBadge } from "@/components/status-badge";
 import { db } from "@/db/client";
 import { ticket } from "@/db/schema";
 import { getPersonnelById } from "@/server/personnel";
@@ -158,11 +159,19 @@ export default async function EditPersonnelPage({
 
       <div className="mt-6 rounded-xl border border-border bg-surface p-6">
         <h2 className="text-lg font-semibold">Ticket QR</h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          {existingTicket
-            ? `Estado actual: ${existingTicket.status === "verified" ? "verificado" : "emitido, sin verificar"}.`
-            : "Todavía no se ha registrado — no tiene ticket."}
-        </p>
+        <div className="mt-2">
+          {existingTicket ? (
+            <StatusBadge
+              variant={
+                existingTicket.status === "verified" ? "verified" : "pending"
+              }
+            />
+          ) : (
+            <span className="text-sm text-muted-foreground">
+              Todavía no se ha registrado — no tiene ticket.
+            </span>
+          )}
+        </div>
         {existingTicket && (
           <form action={resetTicketAction} className="mt-4">
             <input type="hidden" name="id" value={person.id} />

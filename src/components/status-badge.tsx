@@ -14,6 +14,16 @@ const VARIANTS = {
     className: "bg-danger/10 text-danger border-danger/30",
     Icon: AlertIcon,
   },
+  paid: {
+    label: "Pagado",
+    className: "bg-success/10 text-success border-success/30",
+    Icon: CoinIcon,
+  },
+  unpaid: {
+    label: "Debe",
+    className: "bg-danger/10 text-danger border-danger/30",
+    Icon: AlertIcon,
+  },
 } as const;
 
 export type StatusBadgeVariant = keyof typeof VARIANTS;
@@ -67,6 +77,22 @@ function ClockIcon(props: React.SVGProps<SVGSVGElement>) {
       <title>Pendiente</title>
       <circle cx="10" cy="10" r="7" />
       <path d="M10 6v4l3 2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function CoinIcon(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      viewBox="0 0 20 20"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      {...props}
+    >
+      <title>Pagado</title>
+      <circle cx="10" cy="10" r="7" />
+      <path d="M10 6.5v7M8 12.5c0 .83.9 1.5 2 1.5s2-.67 2-1.5-.9-1.3-2-1.5-2-.67-2-1.5.9-1.5 2-1.5 2 .67 2 1.5" />
     </svg>
   );
 }

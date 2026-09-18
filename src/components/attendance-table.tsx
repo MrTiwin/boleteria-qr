@@ -191,9 +191,7 @@ export function AttendanceTable({
                   />
                 </td>
                 <td className="p-3">
-                  <span className={row.pagado ? "text-success" : "text-danger"}>
-                    {row.pagado ? "Pagado" : "Debe"}
-                  </span>
+                  <StatusBadge variant={row.pagado ? "paid" : "unpaid"} />
                 </td>
                 {isAdmin && (
                   <td className="p-3 text-right">

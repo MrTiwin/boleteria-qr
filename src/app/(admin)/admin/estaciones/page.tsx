@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { CopyCodeButton } from "@/components/copy-code-button";
+import { StatusBadge } from "@/components/status-badge";
 import { db } from "@/db/client";
 import { verificationStation } from "@/db/schema";
 import {
@@ -73,15 +74,12 @@ export default async function EstacionesPage({
             key={station.id}
             className="flex flex-wrap items-center justify-between gap-3 p-4"
           >
-            <span className="text-sm">
-              {station.label} —{" "}
-              <span
-                className={
-                  station.active ? "text-success" : "text-muted-foreground"
-                }
-              >
-                {station.active ? "activa" : "desactivada"}
-              </span>
+            <span className="flex items-center gap-2 text-sm">
+              {station.label}
+              <StatusBadge
+                variant={station.active ? "verified" : "danger"}
+                label={station.active ? "Activa" : "Desactivada"}
+              />
             </span>
             <div className="flex gap-2">
               <form action={rotateStationCodeAction}>
