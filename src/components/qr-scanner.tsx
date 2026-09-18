@@ -21,58 +21,98 @@ const RESULT_DISPLAY_MS = 3500;
 export function QrScanner() {
   const [result, setResult] = useState<ScanResult | null>(null);
   const [ring, setRing] = useState<"success" | "danger" | null>(null);
+  const [initError, setInitError] = useState<string | null>(null);
   const processingRef = useRef(false);
   const clearTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // The ring's animation class is applied via this ref, not via React state driving a `key`
+  // (that would remount #qr-reader itself — html5-qrcode grabs that element by id once and
+  // must keep the same DOM node for the life of the camera view, or it breaks). Re-adding the
+  // same class name doesn't restart a CSS animation, so we force it by toggling the class off
+  // and back on across two rAF ticks.
+  const ringElRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const scanner = new Html5QrcodeScanner(
-      CONTAINER_ID,
-      { fps: 10, qrbox: 250 },
-      false,
-    );
+    let scanner: Html5QrcodeScanner;
+    try {
+      scanner = new Html5QrcodeScanner(
+        CONTAINER_ID,
+        { fps: 10, qrbox: 250 },
+        false,
+      );
+    } catch {
+      setInitError(
+        "No se pudo iniciar la cámara en este dispositivo. Recarga la página o prueba con otro navegador.",
+      );
+      return;
+    }
 
-    scanner.render(
-      async (decodedText) => {
-        if (processingRef.current) return;
-        processingRef.current = true;
-        if (clearTimerRef.current) clearTimeout(clearTimerRef.current);
+    try {
+      scanner.render(
+        async (decodedText) => {
+          if (processingRef.current) return;
+          processingRef.current = true;
+          if (clearTimerRef.current) clearTimeout(clearTimerRef.current);
 
-        try {
-          const response = await fetch("/api/verify", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ token: decodedText }),
-          });
-          const body = await response.json();
+          try {
+            const response = await fetch("/api/verify", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ token: decodedText }),
+            });
+            const body = await response.json();
 
-          if (!body.ok) {
+            if (!body.ok) {
+              setResult({
+                status: "error",
+                message: body.error?.message ?? "Error al verificar.",
+              });
+              flashRing("danger");
+            } else if (body.data.alreadyVerified) {
+              setResult({
+                status: "already-verified",
+                verifiedAt: body.data.verifiedAt,
+                stationLabel: body.data.stationLabel,
+              });
+              flashRing("danger");
+            } else {
+              setResult({ status: "verified" });
+              flashRing("success");
+            }
+          } catch {
             setResult({
               status: "error",
-              message: body.error?.message ?? "Error al verificar.",
+              message:
+                "No se pudo conectar. Revisa tu conexión e intenta de nuevo.",
             });
-            setRing("danger");
-          } else if (body.data.alreadyVerified) {
-            setResult({
-              status: "already-verified",
-              verifiedAt: body.data.verifiedAt,
-              stationLabel: body.data.stationLabel,
-            });
-            setRing("danger");
-          } else {
-            setResult({ status: "verified" });
-            setRing("success");
+            flashRing("danger");
+          } finally {
+            processingRef.current = false;
           }
 
-          clearTimerRef.current = setTimeout(() => {
-            setResult(null);
-            setRing(null);
-          }, RESULT_DISPLAY_MS);
-        } finally {
-          processingRef.current = false;
-        }
-      },
-      () => {},
-    );
+          clearTimerRef.current = setTimeout(
+            () => setResult(null),
+            RESULT_DISPLAY_MS,
+          );
+        },
+        () => {},
+      );
+    } catch {
+      setInitError(
+        "No se pudo acceder a la cámara. Revisa los permisos del navegador e intenta de nuevo.",
+      );
+    }
+
+    function flashRing(variant: "success" | "danger") {
+      const el = ringElRef.current;
+      if (!el) return;
+      el.classList.remove("animate-ring-success", "animate-ring-danger");
+      // Force a reflow so the browser registers the class removal before it's re-added —
+      // otherwise it collapses into a no-op and the animation never restarts.
+      void el.offsetWidth;
+      el.classList.add(
+        variant === "success" ? "animate-ring-success" : "animate-ring-danger",
+      );
+    }
 
     return () => {
       if (clearTimerRef.current) clearTimeout(clearTimerRef.current);
@@ -80,21 +120,22 @@ export function QrScanner() {
     };
   }, []);
 
+  if (initError) {
+    return (
+      <div className="mx-auto max-w-md px-4">
+        <div
+          role="alert"
+          className="rounded-xl border border-danger/30 bg-danger/10 p-4 text-sm text-danger"
+        >
+          {initError}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="mx-auto max-w-md px-4">
-      {/* The ring animation lives on this wrapper, keyed to retrigger on each scan — never on
-      the #qr-reader div itself, which html5-qrcode grabs by id once and must stay the same DOM
-      node for the life of the component, or the camera view breaks. */}
-      <div
-        key={ring ?? "idle"}
-        className={`rounded-xl ${
-          ring === "success"
-            ? "animate-ring-success"
-            : ring === "danger"
-              ? "animate-ring-danger"
-              : ""
-        }`}
-      >
+      <div ref={ringElRef} className="rounded-xl">
         <div
           id={CONTAINER_ID}
           className="overflow-hidden rounded-xl border border-border"
