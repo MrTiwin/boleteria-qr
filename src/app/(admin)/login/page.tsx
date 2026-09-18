@@ -15,7 +15,7 @@ export default function AdminLoginPage() {
       <p className="mt-1 text-center text-sm text-muted-foreground">
         Ingresa con tu correo y contraseña de administrador.
       </p>
-      <div className="mt-6 rounded-xl border border-border bg-surface p-6">
+      <div className="mt-6 animate-fade-in-delay-2 rounded-xl border border-border bg-surface p-6">
         <AdminLoginForm />
       </div>
     </main>

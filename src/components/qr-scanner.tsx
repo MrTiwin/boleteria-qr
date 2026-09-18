@@ -75,7 +75,7 @@ export function QrScanner() {
         {result?.status === "verified" && (
           <div
             role="alert"
-            className="flex min-h-14 items-center justify-center gap-2 rounded-xl border border-success/30 bg-success/10 p-4"
+            className="animate-fade-in flex min-h-14 items-center justify-center gap-2 rounded-xl border border-success/30 bg-success/10 p-4"
           >
             <StatusBadge variant="verified" />
           </div>
@@ -83,7 +83,7 @@ export function QrScanner() {
         {result?.status === "already-verified" && (
           <div
             role="alert"
-            className="flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl border border-danger/30 bg-danger/10 p-4"
+            className="animate-fade-in flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl border border-danger/30 bg-danger/10 p-4"
           >
             <StatusBadge variant="danger" />
             {result.stationLabel && (
@@ -96,7 +96,7 @@ export function QrScanner() {
         {result?.status === "error" && (
           <div
             role="alert"
-            className="flex min-h-14 items-center justify-center rounded-xl border border-danger/30 bg-danger/10 p-4 text-danger"
+            className="animate-fade-in flex min-h-14 items-center justify-center rounded-xl border border-danger/30 bg-danger/10 p-4 text-danger"
           >
             {result.message}
           </div>

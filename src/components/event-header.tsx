@@ -9,13 +9,13 @@ export function EventHeader({ compact = false }: { compact?: boolean }) {
       <img
         src="/logo-scyte.png"
         alt="Escudo SCYTE"
-        className={compact ? "h-12 w-auto" : "h-20 w-auto"}
+        className={`animate-fade-in ${compact ? "h-12 w-auto" : "h-20 w-auto"}`}
       />
       <h1
         className={
           compact
-            ? "text-sm font-semibold uppercase leading-snug tracking-wide text-muted-foreground"
-            : "text-balance text-xl font-semibold uppercase leading-tight tracking-wide sm:text-2xl"
+            ? "animate-fade-in-delay-1 text-sm font-semibold uppercase leading-snug tracking-wide text-muted-foreground"
+            : "animate-fade-in-delay-1 text-balance text-xl font-semibold uppercase leading-tight tracking-wide sm:text-2xl"
         }
       >
         {EVENT_TITLE}

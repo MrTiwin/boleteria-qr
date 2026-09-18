@@ -50,7 +50,7 @@ export function AdminLoginForm() {
       <button
         type="submit"
         disabled={pending}
-        className="h-14 rounded-lg bg-primary px-4 font-medium text-primary-foreground disabled:opacity-60"
+        className="h-14 rounded-lg bg-primary px-4 font-medium text-primary-foreground transition duration-150 ease-out hover:brightness-95 active:scale-[0.98] disabled:opacity-60 disabled:active:scale-100"
       >
         Entrar
       </button>

@@ -48,7 +48,7 @@ export default async function EstacionesPage({
         </div>
         <button
           type="submit"
-          className="h-11 rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground"
+          className="h-11 rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground transition duration-150 ease-out hover:brightness-95 active:scale-[0.98]"
         >
           Crear estación
         </button>
@@ -76,7 +76,7 @@ export default async function EstacionesPage({
                 <input type="hidden" name="label" value={station.label} />
                 <button
                   type="submit"
-                  className="h-9 rounded-lg border border-border bg-surface px-3 text-sm"
+                  className="h-9 rounded-lg border border-border bg-surface px-3 text-sm transition-colors duration-150 hover:bg-background"
                 >
                   Rotar código
                 </button>
@@ -86,7 +86,7 @@ export default async function EstacionesPage({
                   <input type="hidden" name="stationId" value={station.id} />
                   <button
                     type="submit"
-                    className="h-9 rounded-lg border border-danger px-3 text-sm text-danger"
+                    className="h-9 rounded-lg border border-danger px-3 text-sm text-danger transition-colors duration-150 hover:bg-danger/10"
                   >
                     Desactivar
                   </button>

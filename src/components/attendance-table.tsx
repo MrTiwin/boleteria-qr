@@ -165,7 +165,10 @@ export function AttendanceTable({ rows }: { rows: AttendanceRow[] }) {
           </thead>
           <tbody>
             {filtered.map((row) => (
-              <tr key={row.personnelId} className="border-t border-border">
+              <tr
+                key={row.personnelId}
+                className="border-t border-border transition-colors duration-150 hover:bg-background/60"
+              >
                 <td className="p-3">{row.grado}</td>
                 <td className="p-3">
                   {row.apellidos}, {row.nombres}
