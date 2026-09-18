@@ -35,9 +35,7 @@
     "id": "E1-T2",
     "title": "Import CSV de personal con validación estricta",
     "epic": "01-foundation",
-    "dependencies": [
-      "E1-T1"
-    ],
+    "dependencies": ["E1-T1"],
     "priority": "p0",
     "acceptance": [
       "WHEN a CSV row is missing a required field THE SYSTEM SHALL reject the whole import and report the row number and field name.",
@@ -65,9 +63,7 @@
     "id": "E1-T3",
     "title": "Auth admin con Better Auth + protección de rutas",
     "epic": "01-foundation",
-    "dependencies": [
-      "E1-T1"
-    ],
+    "dependencies": ["E1-T1"],
     "priority": "p0",
     "acceptance": [
       "WHEN `src/proxy.ts`'s exported `config.matcher` is inspected THE SYSTEM SHALL include a pattern that matches `/admin/dashboard`.",
@@ -95,9 +91,7 @@
     "id": "E1-T4",
     "title": "Flujo de registro: búsqueda, validación CIP/DNI, ticket idempotente",
     "epic": "01-foundation",
-    "dependencies": [
-      "E1-T1"
-    ],
+    "dependencies": ["E1-T1"],
     "priority": "p0",
     "acceptance": [
       "WHEN a valid `cip`+`dni` matching a `personnel` row is submitted with the consent checkbox checked THE SYSTEM SHALL create exactly one `ticket` row for that `personnel_id`.",
@@ -125,9 +119,7 @@
     "id": "E1-T5",
     "title": "Generación de QR con token HMAC firmado + pantalla de ticket",
     "epic": "01-foundation",
-    "dependencies": [
-      "E1-T4"
-    ],
+    "dependencies": ["E1-T4"],
     "priority": "p0",
     "acceptance": [
       "WHEN a ticket is created THE SYSTEM SHALL store a `qr_token` that is a valid HMAC-SHA256 signed payload encoding the ticket id.",
@@ -155,9 +147,7 @@
     "id": "E1-T6",
     "title": "Descarga del ticket como imagen + log de descargas",
     "epic": "01-foundation",
-    "dependencies": [
-      "E1-T5"
-    ],
+    "dependencies": ["E1-T5"],
     "priority": "p1",
     "acceptance": [
       "WHEN the download endpoint is called for an existing ticket THE SYSTEM SHALL increment `download_count` by 1 and insert one `ticket_download_log` row with the caller's IP.",
@@ -183,9 +173,7 @@
     "id": "E1-T7",
     "title": "Buscar mi ticket (CIP+DNI) con rate limiting",
     "epic": "01-foundation",
-    "dependencies": [
-      "E1-T4"
-    ],
+    "dependencies": ["E1-T4"],
     "priority": "p1",
     "acceptance": [
       "WHEN a `cip`+`dni` lookup matches an issued ticket THE SYSTEM SHALL return that ticket's id.",
@@ -211,9 +199,7 @@
     "id": "E2-T1",
     "title": "Gestión de estaciones de verificación + sesión de estación",
     "epic": "02-estaciones-dashboard",
-    "dependencies": [
-      "E1-T3"
-    ],
+    "dependencies": ["E1-T3"],
     "priority": "p0",
     "acceptance": [
       "WHEN an admin creates a station THE SYSTEM SHALL store only a hash of its code, never the plaintext, in `verification_station.code_hash`.",
@@ -242,10 +228,7 @@
     "id": "E2-T2",
     "title": "Verificación por cámara con UPDATE atómico anti-doble-uso",
     "epic": "02-estaciones-dashboard",
-    "dependencies": [
-      "E1-T5",
-      "E2-T1"
-    ],
+    "dependencies": ["E1-T5", "E2-T1"],
     "priority": "p0",
     "acceptance": [
       "WHEN a valid, unverified ticket's QR token is submitted to `/api/verify` THE SYSTEM SHALL set `status='verified'`, record `verified_at` and `verified_by_station`, and return `{ ok:true, data:{ alreadyVerified:false } }`.",
@@ -273,11 +256,7 @@
     "id": "E2-T3",
     "title": "Dashboard admin: contador en vivo + tabla filtrable + login UI",
     "epic": "02-estaciones-dashboard",
-    "dependencies": [
-      "E1-T3",
-      "E1-T2",
-      "E2-T2"
-    ],
+    "dependencies": ["E1-T3", "E1-T2", "E2-T2"],
     "priority": "p0",
     "acceptance": [
       "WHEN `/api/admin/stats` is called by an authenticated admin THE SYSTEM SHALL return `{ ok:true, data:{ verified:number, total:number } }` matching the real `ticket` and `personnel` counts.",
@@ -297,15 +276,14 @@
       "src/components/attendance-table.tsx",
       "tests/server/stats.test.ts"
     ],
-    "status": "pending"
+    "status": "in_progress",
+    "note": "Code complete, tsc/biome pass. All 3 tests hit the usual ECONNREFUSED (beforeEach seeds an admin user). Added better-auth/next-js's nextCookies() plugin to src/lib/auth.ts — without it, auth.api.signInEmail called from a server action never sets the browser's session cookie; verified the fix is real by extracting Set-Cookie from an asResponse:true sign-in and replaying it as a Cookie header in the test, which is also how the test authenticates against the route's GET handler directly (no HTTP server spun up). Added src/server/stats.ts (getAdminStats, getAttendanceRows), src/app/providers.tsx (TanStack Query provider, wired into root layout — first thing in the app to need it), and src/app/(admin)/login/{actions,admin-login-form}.tsx (not in original files list, same pattern as other login flows). AttendanceTable duplicates the AttendanceRow type locally instead of importing it from src/server/stats.ts, per CLAUDE.md's boundary rule (components must never import server/)."
   },
   {
     "id": "E2-T4",
     "title": "Export CSV de la lista de asistencia final",
     "epic": "02-estaciones-dashboard",
-    "dependencies": [
-      "E2-T3"
-    ],
+    "dependencies": ["E2-T3"],
     "priority": "p1",
     "acceptance": [
       "WHEN an authenticated admin requests `/api/admin/export` THE SYSTEM SHALL return a CSV with one row per `personnel` record including grado, apellidos, nombres, cip, pagado, status, verified_at.",
@@ -328,11 +306,7 @@
     "id": "E2-T5",
     "title": "Sistema de diseño aplicado + responsive + accesibilidad",
     "epic": "02-estaciones-dashboard",
-    "dependencies": [
-      "E2-T3",
-      "E1-T7",
-      "E2-T2"
-    ],
+    "dependencies": ["E2-T3", "E1-T7", "E2-T2"],
     "priority": "p1",
     "acceptance": [
       "WHEN the axe scan runs against `/registro`, `/mi-ticket`, and `/verificar` THE SYSTEM SHALL report 0 violations.",
@@ -340,9 +314,7 @@
       "WHEN a status badge renders THE SYSTEM SHALL include both a text label and an icon element, never color alone.",
       "WHEN `pnpm exec playwright test tests/e2e/accessibility.spec.ts` runs THE SYSTEM SHALL report 0 failed."
     ],
-    "verify": [
-      "pnpm exec playwright test tests/e2e/accessibility.spec.ts"
-    ],
+    "verify": ["pnpm exec playwright test tests/e2e/accessibility.spec.ts"],
     "checkpoint": "step-12-design-a11y",
     "files": [
       "src/app/globals.css",
@@ -356,9 +328,7 @@
     "id": "E2-T6",
     "title": "CI pipeline y verificación de build de producción",
     "epic": "02-estaciones-dashboard",
-    "dependencies": [
-      "E2-T5"
-    ],
+    "dependencies": ["E2-T5"],
     "priority": "p0",
     "acceptance": [
       "WHEN `.github/workflows/ci.yml` runs on a push THE SYSTEM SHALL execute install, typecheck, lint, unit tests and build, failing the job if any step exits non-zero.",
