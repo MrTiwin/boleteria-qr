@@ -20,7 +20,6 @@ const RESULT_DISPLAY_MS = 3500;
 
 export function QrScanner() {
   const [result, setResult] = useState<ScanResult | null>(null);
-  const [ring, setRing] = useState<"success" | "danger" | null>(null);
   const [initError, setInitError] = useState<string | null>(null);
   const processingRef = useRef(false);
   const clearTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);

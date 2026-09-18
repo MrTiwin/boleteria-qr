@@ -3,7 +3,7 @@ import { randomInt, randomUUID } from "node:crypto";
 import { hashPassword } from "better-auth/crypto";
 import { and, desc, eq } from "drizzle-orm";
 import { db } from "@/db/client";
-import { account, user as userTable } from "@/db/schema";
+import { account, session, user as userTable } from "@/db/schema";
 import type { ActionResult } from "@/server/tickets";
 
 // Same alphabet as station codes (src/server/stations.ts) — no visually-ambiguous characters,
@@ -74,10 +74,20 @@ export async function createHostUser(
   return { ok: true, data: { password } };
 }
 
-// Scoped to role='anfitrion' in the WHERE clause itself, so this can never delete an admin
-// account even if a caller passed the wrong id.
+// Scoped to role='anfitrion' throughout, so this can never delete an admin account even if a
+// caller passed the wrong id. Deletes `session` and `account` first — both reference user.id
+// with no ON DELETE CASCADE (Better Auth's own schema), so deleting the user row first throws a
+// foreign-key violation with an active session or the always-present credential account row.
 export async function deleteHostUser(userId: string): Promise<void> {
-  await db
-    .delete(userTable)
-    .where(and(eq(userTable.id, userId), eq(userTable.role, "anfitrion")));
+  await db.transaction(async (tx) => {
+    const [host] = await tx
+      .select({ id: userTable.id })
+      .from(userTable)
+      .where(and(eq(userTable.id, userId), eq(userTable.role, "anfitrion")));
+    if (!host) return;
+
+    await tx.delete(session).where(eq(session.userId, userId));
+    await tx.delete(account).where(eq(account.userId, userId));
+    await tx.delete(userTable).where(eq(userTable.id, userId));
+  });
 }
