@@ -1,0 +1,51 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pnpm install:*)",
+      "Bash(pnpm dev:*)",
+      "Bash(pnpm build)",
+      "Bash(pnpm start:*)",
+      "Bash(pnpm exec tsc --noEmit)",
+      "Bash(pnpm exec biome check:*)",
+      "Bash(pnpm exec vitest run:*)",
+      "Bash(pnpm exec playwright test:*)",
+      "Bash(pnpm exec playwright install:*)",
+      "Bash(pnpm exec drizzle-kit generate:*)",
+      "Bash(pnpm exec drizzle-kit migrate:*)",
+      "Bash(pnpm exec drizzle-kit studio:*)",
+      "Bash(pnpm exec tsx scripts/seed-admin.ts)",
+      "Bash(pnpm exec tsx scripts/import-personnel.ts:*)",
+      "Bash(pnpm exec @better-auth/cli secret)",
+      "Bash(pnpm exec @better-auth/cli generate:*)",
+      "Bash(pnpm approve-builds:*)",
+      "Bash(pnpm dlx shadcn:*)",
+      "Bash(corepack enable:*)",
+      "Bash(corepack prepare:*)",
+      "Bash(docker compose up:*)",
+      "Bash(docker compose down:*)",
+      "Bash(docker compose ps:*)",
+      "Bash(git init:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git tag:*)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git ls-files:*)",
+      "Bash(git check-ignore:*)",
+      "Bash(git rev-parse:*)",
+      "Bash(curl -s -o /dev/null -w:*)",
+      "Bash(curl -s http://localhost:3000/*)",
+      "Bash(node -v)",
+      "Bash(openssl rand:*)"
+    ],
+    "deny": [
+      "Read(./.env)",
+      "Read(./.env.*)",
+      "Bash(git push:*)",
+      "Bash(git reset --hard:*)",
+      "Bash(psql * -c DROP*)",
+      "Bash(psql * -c TRUNCATE*)"
+    ]
+  }
+}

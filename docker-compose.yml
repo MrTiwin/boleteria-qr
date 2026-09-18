@@ -1,0 +1,20 @@
+services:
+  test-db:
+    image: postgres:17.6-alpine
+    container_name: boleteria-qr-test-db
+    environment:
+      POSTGRES_USER: boleteria
+      POSTGRES_PASSWORD: boleteria_test
+      POSTGRES_DB: boleteria_test
+    ports:
+      - "5433:5432"
+    volumes:
+      - boleteria_qr_test_db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U boleteria -d boleteria_test"]
+      interval: 2s
+      timeout: 5s
+      retries: 20
+
+volumes:
+  boleteria_qr_test_db:

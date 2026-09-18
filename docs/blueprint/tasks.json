@@ -1,0 +1,273 @@
+[
+  {
+    "id": "E1-T1",
+    "title": "Scaffold Next.js + Drizzle schema + repo init",
+    "epic": "01-foundation",
+    "dependencies": [],
+    "priority": "p0",
+    "acceptance": [
+      "WHEN `pnpm install --frozen-lockfile` runs THE SYSTEM SHALL exit 0 without modifying the lockfile.",
+      "WHEN `pnpm exec tsc --noEmit` runs THE SYSTEM SHALL exit 0 with `strict` true in `tsconfig.json`.",
+      "WHEN `pnpm exec drizzle-kit migrate` runs against `TEST_DATABASE_URL` on an empty database THE SYSTEM SHALL create the `personnel`, `ticket`, `verification_station`, and `ticket_download_log` tables.",
+      "WHEN a query is issued through the exported `db` client in `src/db/client.ts` THE SYSTEM SHALL return typed rows with no `any`.",
+      "WHEN `DATABASE_URL` is absent at import time THE SYSTEM SHALL throw a named error from `src/lib/env.ts` rather than failing at the first query.",
+      "WHEN `pnpm exec vitest run tests/db/client.test.ts` runs THE SYSTEM SHALL report 0 failed."
+    ],
+    "verify": [
+      "pnpm install --frozen-lockfile",
+      "pnpm exec tsc --noEmit",
+      "pnpm exec drizzle-kit generate",
+      "pnpm exec drizzle-kit migrate",
+      "pnpm exec vitest run tests/db/client.test.ts"
+    ],
+    "checkpoint": "step-01-scaffold",
+    "files": ["package.json", "src/db/schema.ts", "src/db/client.ts", "src/lib/env.ts", "tests/db/client.test.ts"],
+    "status": "pending"
+  },
+  {
+    "id": "E1-T2",
+    "title": "Import CSV de personal con validación estricta",
+    "epic": "01-foundation",
+    "dependencies": ["E1-T1"],
+    "priority": "p0",
+    "acceptance": [
+      "WHEN a CSV row is missing a required field THE SYSTEM SHALL reject the whole import and report the row number and field name.",
+      "WHEN two rows share the same `cip` THE SYSTEM SHALL reject the import and report both row numbers.",
+      "WHEN two rows share the same `dni` THE SYSTEM SHALL reject the import and report both row numbers.",
+      "WHEN a CSV validates cleanly THE SYSTEM SHALL replace the `personnel` table contents inside one transaction — either every row lands or none does.",
+      "WHEN `pnpm exec tsx scripts/import-personnel.ts --file {path}` is invoked with a valid file THE SYSTEM SHALL exit 0 and print the row count imported.",
+      "WHEN `pnpm exec vitest run tests/lib/import-personnel.test.ts` runs THE SYSTEM SHALL report 0 failed."
+    ],
+    "verify": [
+      "pnpm exec tsc --noEmit",
+      "pnpm exec vitest run tests/lib/import-personnel.test.ts"
+    ],
+    "checkpoint": "step-02-import-personnel",
+    "files": ["src/lib/import-personnel.ts", "scripts/import-personnel.ts", "src/lib/schemas.ts", "tests/lib/import-personnel.test.ts"],
+    "status": "pending"
+  },
+  {
+    "id": "E1-T3",
+    "title": "Auth admin con Better Auth + protección de rutas",
+    "epic": "01-foundation",
+    "dependencies": ["E1-T1"],
+    "priority": "p0",
+    "acceptance": [
+      "WHEN `src/proxy.ts`'s exported `config.matcher` is inspected THE SYSTEM SHALL include a pattern that matches `/admin/dashboard`.",
+      "WHEN the seed logic is invoked twice with the same `ADMIN_SEED_EMAIL`/`ADMIN_SEED_PASSWORD` THE SYSTEM SHALL leave exactly one matching admin user (idempotent).",
+      "WHEN `auth.api.signInEmail` is called with valid seeded credentials THE SYSTEM SHALL return a non-null session.",
+      "WHEN `auth.api.signInEmail` is called with an invalid password THE SYSTEM SHALL reject and create no session.",
+      "WHEN `pnpm exec vitest run tests/lib/auth.test.ts` runs THE SYSTEM SHALL report 0 failed."
+    ],
+    "verify": [
+      "pnpm exec tsc --noEmit",
+      "pnpm exec vitest run tests/lib/auth.test.ts"
+    ],
+    "checkpoint": "step-03-admin-auth",
+    "files": ["src/lib/auth.ts", "src/app/api/auth/[...all]/route.ts", "src/proxy.ts", "scripts/seed-admin.ts", "tests/lib/auth.test.ts"],
+    "status": "pending"
+  },
+  {
+    "id": "E1-T4",
+    "title": "Flujo de registro: búsqueda, validación CIP/DNI, ticket idempotente",
+    "epic": "01-foundation",
+    "dependencies": ["E1-T1"],
+    "priority": "p0",
+    "acceptance": [
+      "WHEN a valid `cip`+`dni` matching a `personnel` row is submitted with the consent checkbox checked THE SYSTEM SHALL create exactly one `ticket` row for that `personnel_id`.",
+      "WHEN the same `personnel_id` submits again THE SYSTEM SHALL return the existing ticket instead of creating a second row — the `ticket` count for that person stays 1.",
+      "WHEN `cip` matches a record but `dni` does not THE SYSTEM SHALL reject with `{ ok:false, error:{code:'INVALID_CREDENTIALS'} }` and create no ticket.",
+      "WHEN the consent checkbox is not checked THE SYSTEM SHALL reject with `{ ok:false, error:{code:'CONSENT_REQUIRED'} }`.",
+      "WHEN `pnpm exec vitest run tests/server/tickets.test.ts` runs THE SYSTEM SHALL report 0 failed."
+    ],
+    "verify": [
+      "pnpm exec tsc --noEmit",
+      "pnpm exec vitest run tests/server/tickets.test.ts"
+    ],
+    "checkpoint": "step-04-registro",
+    "files": ["src/server/tickets.ts", "src/app/registro/page.tsx", "src/app/registro/actions.ts", "src/lib/schemas.ts", "tests/server/tickets.test.ts"],
+    "status": "pending"
+  },
+  {
+    "id": "E1-T5",
+    "title": "Generación de QR con token HMAC firmado + pantalla de ticket",
+    "epic": "01-foundation",
+    "dependencies": ["E1-T4"],
+    "priority": "p0",
+    "acceptance": [
+      "WHEN a ticket is created THE SYSTEM SHALL store a `qr_token` that is a valid HMAC-SHA256 signed payload encoding the ticket id.",
+      "WHEN `verifyQrToken` is called with a tampered payload (one character altered) THE SYSTEM SHALL return `{ valid:false }`.",
+      "WHEN `verifyQrToken` is called with the exact stored token THE SYSTEM SHALL return `{ valid:true, ticketId }` matching the ticket.",
+      "WHEN `/ticket/[id]` is requested for an existing ticket THE SYSTEM SHALL render a PNG QR image generated server-side from the stored token.",
+      "WHEN `pnpm exec vitest run tests/lib/qr-token.test.ts` runs THE SYSTEM SHALL report 0 failed."
+    ],
+    "verify": [
+      "pnpm exec tsc --noEmit",
+      "pnpm exec vitest run tests/lib/qr-token.test.ts"
+    ],
+    "checkpoint": "step-05-qr-token",
+    "files": ["src/lib/qr-token.ts", "src/lib/qr-image.ts", "src/app/ticket/[id]/page.tsx", "src/server/tickets.ts", "tests/lib/qr-token.test.ts"],
+    "status": "pending"
+  },
+  {
+    "id": "E1-T6",
+    "title": "Descarga del ticket como imagen + log de descargas",
+    "epic": "01-foundation",
+    "dependencies": ["E1-T5"],
+    "priority": "p1",
+    "acceptance": [
+      "WHEN the download endpoint is called for an existing ticket THE SYSTEM SHALL increment `download_count` by 1 and insert one `ticket_download_log` row with the caller's IP.",
+      "WHEN the download endpoint is called 3 times for the same ticket THE SYSTEM SHALL leave `download_count` at 3 and `ticket_download_log` with 3 rows for it.",
+      "WHEN the endpoint is called for a nonexistent ticket id THE SYSTEM SHALL respond 404 and write no row.",
+      "WHEN `pnpm exec vitest run tests/server/ticket-downloads.test.ts` runs THE SYSTEM SHALL report 0 failed."
+    ],
+    "verify": [
+      "pnpm exec tsc --noEmit",
+      "pnpm exec vitest run tests/server/ticket-downloads.test.ts"
+    ],
+    "checkpoint": "step-06-download-log",
+    "files": ["src/components/ticket-card.tsx", "src/app/api/tickets/[id]/download/route.ts", "src/server/ticket-downloads.ts", "tests/server/ticket-downloads.test.ts"],
+    "status": "pending"
+  },
+  {
+    "id": "E1-T7",
+    "title": "Buscar mi ticket (CIP+DNI) con rate limiting",
+    "epic": "01-foundation",
+    "dependencies": ["E1-T4"],
+    "priority": "p1",
+    "acceptance": [
+      "WHEN a `cip`+`dni` lookup matches an issued ticket THE SYSTEM SHALL return that ticket's id.",
+      "WHEN 5 failed lookups for the same `cip` occur within one hour THE SYSTEM SHALL reject the 6th attempt with `{ ok:false, error:{code:'RATE_LIMITED'} }` regardless of whether the credentials are correct.",
+      "WHEN a failed lookup is older than one hour THE SYSTEM SHALL NOT count toward the rate limit.",
+      "WHEN `pnpm exec vitest run tests/server/rate-limit.test.ts` runs THE SYSTEM SHALL report 0 failed."
+    ],
+    "verify": [
+      "pnpm exec tsc --noEmit",
+      "pnpm exec vitest run tests/server/rate-limit.test.ts"
+    ],
+    "checkpoint": "step-07-mi-ticket",
+    "files": ["src/server/rate-limit.ts", "src/app/mi-ticket/page.tsx", "src/app/mi-ticket/actions.ts", "tests/server/rate-limit.test.ts"],
+    "status": "pending"
+  },
+  {
+    "id": "E2-T1",
+    "title": "Gestión de estaciones de verificación + sesión de estación",
+    "epic": "02-estaciones-dashboard",
+    "dependencies": ["E1-T3"],
+    "priority": "p0",
+    "acceptance": [
+      "WHEN an admin creates a station THE SYSTEM SHALL store only a hash of its code, never the plaintext, in `verification_station.code_hash`.",
+      "WHEN an admin rotates a station's code THE SYSTEM SHALL make the old code's hash no longer match on the next verification attempt.",
+      "WHEN a valid, active station code is submitted at `/verificar/login` THE SYSTEM SHALL set a signed station-session cookie and redirect to `/verificar`.",
+      "WHEN an invalid station code is submitted THE SYSTEM SHALL reject it and set no cookie.",
+      "WHEN a station is deactivated (`active=false`) THE SYSTEM SHALL reject that station's code even if it is otherwise correct.",
+      "WHEN `pnpm exec vitest run tests/server/stations.test.ts` runs THE SYSTEM SHALL report 0 failed."
+    ],
+    "verify": [
+      "pnpm exec tsc --noEmit",
+      "pnpm exec vitest run tests/server/stations.test.ts"
+    ],
+    "checkpoint": "step-08-stations",
+    "files": ["src/server/stations.ts", "src/lib/station-session.ts", "src/app/(admin)/admin/estaciones/page.tsx", "src/app/(admin)/admin/estaciones/actions.ts", "src/app/verificar/login/page.tsx"],
+    "status": "pending"
+  },
+  {
+    "id": "E2-T2",
+    "title": "Verificación por cámara con UPDATE atómico anti-doble-uso",
+    "epic": "02-estaciones-dashboard",
+    "dependencies": ["E1-T5", "E2-T1"],
+    "priority": "p0",
+    "acceptance": [
+      "WHEN a valid, unverified ticket's QR token is submitted to `/api/verify` THE SYSTEM SHALL set `status='verified'`, record `verified_at` and `verified_by_station`, and return `{ ok:true, data:{ alreadyVerified:false } }`.",
+      "WHEN the same ticket is submitted a second time THE SYSTEM SHALL return `{ ok:true, data:{ alreadyVerified:true, verifiedAt, stationLabel } }` and SHALL NOT change the stored `verified_at`.",
+      "WHEN a token with an invalid HMAC signature is submitted THE SYSTEM SHALL reject with `{ ok:false, error:{code:'INVALID_SIGNATURE'} }` before any database write.",
+      "WHEN 10 concurrent verification requests are issued for the SAME ticket id THE SYSTEM SHALL mark it verified exactly once — exactly 1 of the 10 responses has `alreadyVerified:false` and 9 have `alreadyVerified:true`.",
+      "WHEN `pnpm exec vitest run tests/server/verify-concurrency.test.ts` runs THE SYSTEM SHALL report 0 failed."
+    ],
+    "verify": [
+      "pnpm exec tsc --noEmit",
+      "pnpm exec vitest run tests/server/verify-concurrency.test.ts"
+    ],
+    "checkpoint": "step-09-verify-concurrency",
+    "files": ["src/server/verify.ts", "src/app/api/verify/route.ts", "src/app/verificar/page.tsx", "src/components/qr-scanner.tsx", "tests/server/verify-concurrency.test.ts"],
+    "status": "pending"
+  },
+  {
+    "id": "E2-T3",
+    "title": "Dashboard admin: contador en vivo + tabla filtrable + login UI",
+    "epic": "02-estaciones-dashboard",
+    "dependencies": ["E1-T3", "E1-T2", "E2-T2"],
+    "priority": "p0",
+    "acceptance": [
+      "WHEN `/api/admin/stats` is called by an authenticated admin THE SYSTEM SHALL return `{ ok:true, data:{ verified:number, total:number } }` matching the real `ticket` and `personnel` counts.",
+      "WHEN an unauthenticated request hits `/api/admin/stats` THE SYSTEM SHALL respond 401 and return no counts.",
+      "WHEN a ticket's status changes to `verified` between two calls THE SYSTEM SHALL reflect the new count on the next call to `/api/admin/stats`.",
+      "WHEN `pnpm exec vitest run tests/server/stats.test.ts` runs THE SYSTEM SHALL report 0 failed."
+    ],
+    "verify": [
+      "pnpm exec tsc --noEmit",
+      "pnpm exec vitest run tests/server/stats.test.ts"
+    ],
+    "checkpoint": "step-10-dashboard",
+    "files": ["src/app/(admin)/login/page.tsx", "src/app/(admin)/admin/page.tsx", "src/app/api/admin/stats/route.ts", "src/components/attendance-table.tsx", "tests/server/stats.test.ts"],
+    "status": "pending"
+  },
+  {
+    "id": "E2-T4",
+    "title": "Export CSV de la lista de asistencia final",
+    "epic": "02-estaciones-dashboard",
+    "dependencies": ["E2-T3"],
+    "priority": "p1",
+    "acceptance": [
+      "WHEN an authenticated admin requests `/api/admin/export` THE SYSTEM SHALL return a CSV with one row per `personnel` record including grado, apellidos, nombres, cip, pagado, status, verified_at.",
+      "WHEN an unauthenticated request hits `/api/admin/export` THE SYSTEM SHALL respond 401.",
+      "WHEN `pnpm exec vitest run tests/server/export.test.ts` runs THE SYSTEM SHALL report 0 failed."
+    ],
+    "verify": [
+      "pnpm exec tsc --noEmit",
+      "pnpm exec vitest run tests/server/export.test.ts"
+    ],
+    "checkpoint": "step-11-export",
+    "files": ["src/app/api/admin/export/route.ts", "src/server/export.ts", "tests/server/export.test.ts"],
+    "status": "pending"
+  },
+  {
+    "id": "E2-T5",
+    "title": "Sistema de diseño aplicado + responsive + accesibilidad",
+    "epic": "02-estaciones-dashboard",
+    "dependencies": ["E2-T3", "E1-T7", "E2-T2"],
+    "priority": "p1",
+    "acceptance": [
+      "WHEN the axe scan runs against `/registro`, `/mi-ticket`, and `/verificar` THE SYSTEM SHALL report 0 violations.",
+      "WHEN the viewport is 375px wide THE SYSTEM SHALL show no horizontal scroll on `/registro`.",
+      "WHEN a status badge renders THE SYSTEM SHALL include both a text label and an icon element, never color alone.",
+      "WHEN `pnpm exec playwright test tests/e2e/accessibility.spec.ts` runs THE SYSTEM SHALL report 0 failed."
+    ],
+    "verify": [
+      "pnpm exec playwright test tests/e2e/accessibility.spec.ts"
+    ],
+    "checkpoint": "step-12-design-a11y",
+    "files": ["src/app/globals.css", "src/components/status-badge.tsx", "package.json", "tests/e2e/accessibility.spec.ts"],
+    "status": "pending"
+  },
+  {
+    "id": "E2-T6",
+    "title": "CI pipeline y verificación de build de producción",
+    "epic": "02-estaciones-dashboard",
+    "dependencies": ["E2-T5"],
+    "priority": "p0",
+    "acceptance": [
+      "WHEN `.github/workflows/ci.yml` runs on a push THE SYSTEM SHALL execute install, typecheck, lint, unit tests and build, failing the job if any step exits non-zero.",
+      "WHEN `pnpm build` runs THE SYSTEM SHALL exit 0 and produce a `.next` production build with zero type errors.",
+      "WHEN the built app is started with `pnpm start` and `GET /` is requested THE SYSTEM SHALL return HTTP 200.",
+      "WHEN `GET /api/health` is requested against the running build THE SYSTEM SHALL return HTTP 200 with `{ ok:true, data:{ db:'ok' } }` after checking a real database connection."
+    ],
+    "verify": [
+      "pnpm build",
+      "pnpm exec vitest run tests/server/health.test.ts"
+    ],
+    "checkpoint": "step-13-ci-deploy-readiness",
+    "files": [".github/workflows/ci.yml", "src/app/api/health/route.ts", "tests/server/health.test.ts"],
+    "status": "pending"
+  }
+]
