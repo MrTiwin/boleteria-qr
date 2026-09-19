@@ -10,42 +10,64 @@ export async function getPersonnelById(id: string) {
   return rows[0] ?? null;
 }
 
-// Re-checks cip/dni uniqueness by hand because this is an UPDATE, not the bulk import's
-// all-or-nothing INSERT (src/lib/import-personnel.ts) — the database's own unique constraints
-// are the actual guarantee, this just turns that into a friendly error instead of a 500.
-export async function updatePersonnel(
-  id: string,
-  input: EditPersonnelInput,
-): Promise<ActionResult<{ id: string }>> {
+// Re-checks cip/dni uniqueness by hand because these are single-row writes, not the bulk
+// import's all-or-nothing INSERT (src/lib/import-personnel.ts) — the database's own unique
+// constraints are the actual guarantee, this just turns that into a friendly error instead of a
+// 500. `excludeId` skips the row being edited so a person doesn't conflict with themselves.
+async function findIdentityConflict(
+  input: Pick<EditPersonnelInput, "cip" | "dni">,
+  excludeId?: string,
+): Promise<{ code: string; message: string } | null> {
+  const sameIdentity = or(
+    eq(personnel.cip, input.cip),
+    eq(personnel.dni, input.dni),
+  );
   const conflicts = await db
-    .select({ id: personnel.id, cip: personnel.cip, dni: personnel.dni })
+    .select({ cip: personnel.cip, dni: personnel.dni })
     .from(personnel)
     .where(
-      and(
-        ne(personnel.id, id),
-        or(eq(personnel.cip, input.cip), eq(personnel.dni, input.dni)),
-      ),
+      excludeId ? and(ne(personnel.id, excludeId), sameIdentity) : sameIdentity,
     );
 
   if (conflicts.some((row) => row.cip === input.cip)) {
     return {
-      ok: false,
-      error: {
-        code: "CIP_TAKEN",
-        message: "Ese CIP ya pertenece a otra persona.",
-      },
+      code: "CIP_TAKEN",
+      message: "Ese CIP ya pertenece a otra persona.",
     };
   }
   if (conflicts.some((row) => row.dni === input.dni)) {
     return {
-      ok: false,
-      error: {
-        code: "DNI_TAKEN",
-        message: "Ese DNI ya pertenece a otra persona.",
-      },
+      code: "DNI_TAKEN",
+      message: "Ese DNI ya pertenece a otra persona.",
     };
+  }
+  return null;
+}
+
+export async function updatePersonnel(
+  id: string,
+  input: EditPersonnelInput,
+): Promise<ActionResult<{ id: string }>> {
+  const conflict = await findIdentityConflict(input, id);
+  if (conflict) {
+    return { ok: false, error: conflict };
   }
 
   await db.update(personnel).set(input).where(eq(personnel.id, id));
   return { ok: true, data: { id } };
+}
+
+export async function createPersonnel(
+  input: EditPersonnelInput,
+): Promise<ActionResult<{ id: string }>> {
+  const conflict = await findIdentityConflict(input);
+  if (conflict) {
+    return { ok: false, error: conflict };
+  }
+
+  const [created] = await db
+    .insert(personnel)
+    .values(input)
+    .returning({ id: personnel.id });
+  return { ok: true, data: { id: created.id } };
 }

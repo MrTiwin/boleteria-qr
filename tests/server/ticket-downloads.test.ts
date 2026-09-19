@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { db } from "@/db/client";
 import { personnel, ticket, ticketDownloadLog } from "@/db/schema";
 import { recordTicketDownload } from "@/server/ticket-downloads";
-import { createOrGetTicket } from "@/server/tickets";
+import { createOrGetTicket, resetTicket } from "@/server/tickets";
 
 let personnelId: string;
 
@@ -81,6 +81,19 @@ describe("recordTicketDownload", () => {
       .from(ticket)
       .where(eq(ticket.id, created.id));
     expect(row.downloadCount).toBe(10);
+  });
+
+  it("resetting a ticket that has download history succeeds and keeps the audit rows", async () => {
+    const created = await createOrGetTicket(personnelId);
+    await recordTicketDownload(created.id, "203.0.113.7");
+
+    await resetTicket(personnelId);
+
+    expect(await db.select().from(ticket)).toHaveLength(0);
+    const logs = await db.select().from(ticketDownloadLog);
+    expect(logs).toHaveLength(1);
+    expect(logs[0].ticketId).toBeNull();
+    expect(logs[0].ip).toBe("203.0.113.7");
   });
 
   it("returns NOT_FOUND and writes no row for a nonexistent ticket id", async () => {

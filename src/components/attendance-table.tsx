@@ -23,8 +23,16 @@ type AttendanceRow = {
   verifiedAt: Date | null;
 };
 
+type Stats = {
+  total: number;
+  registered: number;
+  verified: number;
+  unregistered: number;
+  debtors: number;
+};
+
 type StatsResponse =
-  | { ok: true; data: { verified: number; total: number } }
+  | { ok: true; data: Stats }
   | { ok: false; error: { code: string; message: string } };
 
 const POLL_INTERVAL_MS = 5000;
@@ -41,19 +49,51 @@ export function LiveAttendanceCounter() {
     refetchInterval: POLL_INTERVAL_MS,
   });
 
-  const verified = data?.ok ? data.data.verified : null;
-  const total = data?.ok ? data.data.total : null;
+  const stats = data?.ok ? data.data : null;
+
+  // Four counters instead of one: the admin needs the whole funnel at a glance — who has
+  // registered, who is actually through the door, who hasn't registered yet, and who still owes
+  // payment — not only the door count.
+  const cards = [
+    {
+      label: "Verificados",
+      value: stats ? `${stats.verified} / ${stats.total}` : "…",
+      tone: "text-success",
+    },
+    {
+      label: "Registrados",
+      value: stats ? stats.registered : "…",
+      tone: "text-primary",
+    },
+    {
+      label: "Sin registrar",
+      value: stats ? stats.unregistered : "…",
+      tone: "text-secondary",
+    },
+    {
+      label: "Deudores",
+      value: stats ? stats.debtors : "…",
+      tone: "text-danger",
+    },
+  ];
 
   return (
     <div
       role="status"
       aria-live="polite"
-      className="rounded-xl border border-border bg-surface p-4"
+      className="grid grid-cols-2 gap-3 sm:grid-cols-4"
     >
-      <p className="text-sm text-muted-foreground">Verificados en vivo</p>
-      <p className="text-3xl font-semibold tabular-nums">
-        {verified ?? "…"} / {total ?? "…"}
-      </p>
+      {cards.map((card) => (
+        <div
+          key={card.label}
+          className="rounded-xl border border-border bg-surface p-4"
+        >
+          <p className="text-sm text-muted-foreground">{card.label}</p>
+          <p className={`text-3xl font-semibold tabular-nums ${card.tone}`}>
+            {card.value}
+          </p>
+        </div>
+      ))}
     </div>
   );
 }
@@ -84,6 +124,9 @@ export function AttendanceTable({
     AttendanceRow["status"] | "all"
   >("all");
   const [gradoFilter, setGradoFilter] = useState<string>("all");
+  const [paidFilter, setPaidFilter] = useState<"all" | "paid" | "unpaid">(
+    "all",
+  );
   const [query, setQuery] = useState("");
 
   const grados = sortGrados(rows.map((row) => row.grado));
@@ -91,6 +134,8 @@ export function AttendanceTable({
   const filtered = rows.filter((row) => {
     if (statusFilter !== "all" && row.status !== statusFilter) return false;
     if (gradoFilter !== "all" && row.grado !== gradoFilter) return false;
+    if (paidFilter === "paid" && !row.pagado) return false;
+    if (paidFilter === "unpaid" && row.pagado) return false;
     if (query) {
       const haystack =
         `${row.apellidos} ${row.nombres} ${row.cip}`.toLowerCase();
@@ -161,12 +206,43 @@ export function AttendanceTable({
             ))}
           </select>
         </div>
+
+        <div>
+          <label
+            htmlFor="attendance-paid"
+            className="block text-sm font-medium"
+          >
+            Pago
+          </label>
+          <select
+            id="attendance-paid"
+            value={paidFilter}
+            onChange={(e) =>
+              setPaidFilter(e.target.value as "all" | "paid" | "unpaid")
+            }
+            className="mt-1 h-11 rounded-lg border border-border bg-surface px-3"
+          >
+            <option value="all">Todos</option>
+            <option value="paid">Pagado</option>
+            <option value="unpaid">Debe</option>
+          </select>
+        </div>
       </div>
+
+      <p
+        role="status"
+        aria-live="polite"
+        className="mb-2 text-sm text-muted-foreground"
+      >
+        Mostrando <strong className="tabular-nums">{filtered.length}</strong> de{" "}
+        <span className="tabular-nums">{rows.length}</span>
+      </p>
 
       <div className="overflow-x-auto rounded-xl border border-border">
         <table className="w-full text-left text-sm">
           <thead className="bg-surface">
             <tr>
+              <th className="p-3">N°</th>
               <th className="p-3">Grado</th>
               <th className="p-3">Apellidos y nombres</th>
               <th className="p-3">CIP</th>
@@ -176,11 +252,14 @@ export function AttendanceTable({
             </tr>
           </thead>
           <tbody>
-            {filtered.map((row) => (
+            {filtered.map((row, index) => (
               <tr
                 key={row.personnelId}
                 className="border-t border-border transition-colors duration-150 hover:bg-background/60"
               >
+                <td className="p-3 tabular-nums text-muted-foreground">
+                  {index + 1}
+                </td>
                 <td className="p-3">{row.grado}</td>
                 <td className="p-3">
                   {row.apellidos}, {row.nombres}

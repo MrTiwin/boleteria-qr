@@ -4,18 +4,36 @@ import { db } from "@/db/client";
 import { personnel, ticket } from "@/db/schema";
 import { compareByGrado } from "@/lib/grados";
 
-export type AdminStats = { verified: number; total: number };
+export type AdminStats = {
+  total: number;
+  // Everyone holding a ticket, verified or not — "registrado" in the dashboard's vocabulary.
+  registered: number;
+  verified: number;
+  unregistered: number;
+  debtors: number;
+};
 
 export async function getAdminStats(): Promise<AdminStats> {
   const [totalRow] = await db.select({ value: count() }).from(personnel);
+  const [registeredRow] = await db.select({ value: count() }).from(ticket);
   const [verifiedRow] = await db
     .select({ value: count() })
     .from(ticket)
     .where(eq(ticket.status, "verified"));
+  const [debtorsRow] = await db
+    .select({ value: count() })
+    .from(personnel)
+    .where(eq(personnel.pagado, false));
+
+  const total = totalRow?.value ?? 0;
+  const registered = registeredRow?.value ?? 0;
 
   return {
+    total,
+    registered,
     verified: verifiedRow?.value ?? 0,
-    total: totalRow?.value ?? 0,
+    unregistered: total - registered,
+    debtors: debtorsRow?.value ?? 0,
   };
 }
 

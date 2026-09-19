@@ -47,6 +47,12 @@ export default async function AdminDashboardPage() {
               >
                 Usuarios
               </a>
+              <a
+                href="/admin/personal/nuevo"
+                className="h-11 rounded-lg bg-primary px-4 text-sm font-medium leading-[44px] text-primary-foreground transition duration-150 ease-out hover:brightness-95"
+              >
+                Agregar persona
+              </a>
             </>
           )}
           <a

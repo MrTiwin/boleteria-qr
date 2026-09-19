@@ -132,12 +132,14 @@ export const verificationStation = pgTable("verification_station", {
 });
 
 // Append-only audit trail for the CIP+DNI weak-credential risk — see the blueprint's risk
-// register. Never delete or update a row here.
+// register. Never delete or update a row here. `ticket_id` goes NULL (rather than blocking the
+// delete, or cascading and erasing the trail) when an admin resets a ticket — the row itself, with
+// its ip and timestamp, is what must survive.
 export const ticketDownloadLog = pgTable("ticket_download_log", {
   id: uuid("id").primaryKey().defaultRandom(),
-  ticketId: uuid("ticket_id")
-    .notNull()
-    .references(() => ticket.id),
+  ticketId: uuid("ticket_id").references(() => ticket.id, {
+    onDelete: "set null",
+  }),
   ip: text("ip").notNull(),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
