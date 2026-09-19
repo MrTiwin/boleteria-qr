@@ -21,9 +21,18 @@ export function StationLoginForm() {
           id="code"
           name="code"
           autoComplete="off"
+          autoCapitalize="characters"
+          autoCorrect="off"
+          spellCheck={false}
           maxLength={30}
           required
-          className="mt-1 h-14 w-full rounded-lg border border-border bg-background px-3 text-base transition-colors duration-150 focus:border-primary"
+          onChange={(e) => {
+            const el = e.currentTarget;
+            const { selectionStart, selectionEnd } = el;
+            el.value = el.value.toUpperCase();
+            el.setSelectionRange(selectionStart, selectionEnd);
+          }}
+          className="mt-1 h-14 w-full rounded-lg border border-border bg-background px-3 text-base uppercase tracking-widest transition-colors duration-150 focus:border-primary"
         />
       </div>
 

@@ -15,6 +15,13 @@ const digitsField = (label: string) =>
     .max(15, `${label} es demasiado largo`)
     .regex(/^\d+$/, `${label} solo debe contener números`);
 
+// A Peruvian DNI is always 8 digits. Spreadsheet exports store it as a number and silently drop
+// the leading zero (08169957 -> 8169957), so every DNI that enters the system — CSV import,
+// registration, ticket lookup, admin edit — is left-padded to 8 here. Without this, a person
+// typing their real 8-digit DNI never matches the 7-digit value stored for them.
+const dniField = (label: string) =>
+  digitsField(label).transform((value) => value.padStart(8, "0"));
+
 // Generous caps on free-text name fields — long enough for any real grado/apellidos/nombres,
 // short enough to block pasted-in garbage.
 const shortTextField = (label: string, max: number) =>
@@ -38,7 +45,7 @@ export const personnelCsvRowSchema = z.object({
   apellidos: shortTextField("apellidos", 100),
   nombres: shortTextField("nombres", 100),
   cip: digitsField("cip"),
-  dni: digitsField("dni"),
+  dni: dniField("dni"),
   pagado: z.enum(["SI", "NO"], { message: "pagado must be SI or NO" }),
 });
 
@@ -46,7 +53,7 @@ export type PersonnelCsvRow = z.infer<typeof personnelCsvRowSchema>;
 
 export const registroSchema = z.object({
   cip: digitsField("CIP"),
-  dni: digitsField("DNI"),
+  dni: dniField("DNI"),
   consent: z.boolean(),
 });
 
@@ -57,7 +64,7 @@ export const editPersonnelSchema = z.object({
   apellidos: shortTextField("apellidos", 100),
   nombres: shortTextField("nombres", 100),
   cip: digitsField("CIP"),
-  dni: digitsField("DNI"),
+  dni: dniField("DNI"),
   pagado: z.boolean(),
 });
 
@@ -103,7 +110,10 @@ export const stationLoginSchema = z.object({
     .string()
     .trim()
     .min(1, "Ingresa el código de la estación.")
-    .max(30, "Código demasiado largo."),
+    .max(30, "Código demasiado largo.")
+    // Codes are generated uppercase-only (CODE_ALPHABET), so a lowercase paste/autofill must still
+    // match — the input uppercases while typing, this covers everything that bypasses it.
+    .transform((value) => value.toUpperCase()),
 });
 
 export type StationLoginInput = z.infer<typeof stationLoginSchema>;
