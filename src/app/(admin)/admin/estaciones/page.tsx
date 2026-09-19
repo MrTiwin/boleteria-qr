@@ -3,6 +3,7 @@ import { CopyCodeButton } from "@/components/copy-code-button";
 import { StatusBadge } from "@/components/status-badge";
 import { db } from "@/db/client";
 import { verificationStation } from "@/db/schema";
+import { getStationScanCounts } from "@/server/stations";
 import {
   activateStationAction,
   createStationAction,
@@ -16,7 +17,11 @@ export default async function EstacionesPage({
   searchParams: Promise<{ newCode?: string; label?: string; error?: string }>;
 }) {
   const { newCode, label, error } = await searchParams;
-  const stations = await db.select().from(verificationStation);
+  const [stations, scanCounts] = await Promise.all([
+    db.select().from(verificationStation),
+    getStationScanCounts(),
+  ]);
+  const totalScans = [...scanCounts.values()].reduce((sum, n) => sum + n, 0);
 
   return (
     <main className="mx-auto min-h-dvh max-w-2xl px-4 py-8">
@@ -78,7 +83,12 @@ export default async function EstacionesPage({
         </button>
       </form>
 
-      <ul className="mt-6 divide-y divide-border rounded-xl border border-border">
+      <p className="mt-6 text-sm text-muted-foreground">
+        Total verificado entre todas las estaciones:{" "}
+        <strong className="tabular-nums text-foreground">{totalScans}</strong>
+      </p>
+
+      <ul className="mt-2 divide-y divide-border rounded-xl border border-border">
         {stations.map((station) => (
           <li
             key={station.id}
@@ -90,6 +100,12 @@ export default async function EstacionesPage({
                 variant={station.active ? "verified" : "danger"}
                 label={station.active ? "Activa" : "Desactivada"}
               />
+            </span>
+            <span className="text-sm text-muted-foreground">
+              <strong className="tabular-nums text-foreground">
+                {scanCounts.get(station.id) ?? 0}
+              </strong>{" "}
+              escaneos
             </span>
             <div className="flex gap-2">
               <form action={rotateStationCodeAction}>

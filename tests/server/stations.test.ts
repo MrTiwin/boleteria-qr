@@ -1,7 +1,12 @@
 import { sql } from "drizzle-orm";
 import { beforeEach, describe, expect, it } from "vitest";
 import { db } from "@/db/client";
-import { stationLoginAttempt, verificationStation } from "@/db/schema";
+import {
+  personnel,
+  stationLoginAttempt,
+  ticket,
+  verificationStation,
+} from "@/db/schema";
 import {
   createStationSessionToken,
   verifyStationSessionToken,
@@ -9,9 +14,13 @@ import {
 import {
   createStation,
   deactivateStation,
+  getStationScanCounts,
+  getStationSummary,
   rotateStationCode,
   verifyStationCode,
 } from "@/server/stations";
+import { createOrGetTicket } from "@/server/tickets";
+import { verifyTicket } from "@/server/verify";
 
 describe("station session token (no DB)", () => {
   it("round-trips: verifyStationSessionToken recovers the stationId from a token created by createStationSessionToken", () => {
@@ -31,6 +40,9 @@ describe("station session token (no DB)", () => {
 
 describe("stations (touches TEST_DATABASE_URL)", () => {
   beforeEach(async () => {
+    // Tickets reference stations (verified_by_station), so they have to go first.
+    await db.execute(sql`delete from ${ticket}`);
+    await db.execute(sql`delete from ${personnel}`);
     await db.execute(sql`delete from ${verificationStation}`);
     await db.execute(sql`delete from ${stationLoginAttempt}`);
   });
@@ -80,5 +92,57 @@ describe("stations (touches TEST_DATABASE_URL)", () => {
       ok: false,
       error: { code: "RATE_LIMITED", message: expect.any(String) },
     });
+  });
+
+  it("counts a station's first-time verifications, not repeat scans of the same QR", async () => {
+    const { station: a } = await createStation("Puerta A");
+    const { station: b } = await createStation("Puerta B");
+
+    const people = await db
+      .insert(personnel)
+      .values([
+        {
+          grado: "CAP",
+          apellidos: "UNO",
+          nombres: "A",
+          cip: "1000001",
+          dni: "10000001",
+        },
+        {
+          grado: "CAP",
+          apellidos: "DOS",
+          nombres: "B",
+          cip: "1000002",
+          dni: "10000002",
+        },
+        {
+          grado: "CAP",
+          apellidos: "TRES",
+          nombres: "C",
+          cip: "1000003",
+          dni: "10000003",
+        },
+      ])
+      .returning();
+    const tickets = await Promise.all(
+      people.map((p) => createOrGetTicket(p.id)),
+    );
+
+    await verifyTicket(tickets[0].qrToken, a.id);
+    await verifyTicket(tickets[1].qrToken, a.id);
+    await verifyTicket(tickets[2].qrToken, b.id);
+    // Station B re-scanning a ticket A already used must not steal or add a count.
+    await verifyTicket(tickets[0].qrToken, b.id);
+
+    const counts = await getStationScanCounts();
+    expect(counts.get(a.id)).toBe(2);
+    expect(counts.get(b.id)).toBe(1);
+    expect(await getStationSummary(a.id)).toEqual({
+      label: "Puerta A",
+      scans: 2,
+    });
+    expect(
+      await getStationSummary("00000000-0000-0000-0000-000000000000"),
+    ).toBeNull();
   });
 });

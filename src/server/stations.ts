@@ -3,7 +3,7 @@ import { randomInt } from "node:crypto";
 import { hashPassword, verifyPassword } from "better-auth/crypto";
 import { and, count, eq, gt } from "drizzle-orm";
 import { db } from "@/db/client";
-import { stationLoginAttempt, verificationStation } from "@/db/schema";
+import { stationLoginAttempt, ticket, verificationStation } from "@/db/schema";
 import type { ActionResult } from "@/server/tickets";
 
 const LOGIN_WINDOW_MS = 60 * 60 * 1000;
@@ -112,4 +112,42 @@ export async function verifyStationCode(
       message: "Código de estación inválido o inactivo.",
     },
   };
+}
+
+// "Escaneos" = tickets this station verified for the first time. Repeat scans of an already-used
+// QR and invalid QRs deliberately don't count — they write nothing, so the number is exactly the
+// people this station let through, which is what an operator (or the admin) wants to see.
+export async function getStationScanCounts(): Promise<Map<string, number>> {
+  const rows = await db
+    .select({ stationId: ticket.verifiedByStation, value: count() })
+    .from(ticket)
+    .where(eq(ticket.status, "verified"))
+    .groupBy(ticket.verifiedByStation);
+
+  const counts = new Map<string, number>();
+  for (const row of rows) {
+    if (row.stationId) counts.set(row.stationId, row.value);
+  }
+  return counts;
+}
+
+export async function getStationSummary(
+  stationId: string,
+): Promise<{ label: string; scans: number } | null> {
+  const [station] = await db
+    .select({ label: verificationStation.label })
+    .from(verificationStation)
+    .where(eq(verificationStation.id, stationId));
+  if (!station) return null;
+
+  const [row] = await db
+    .select({ value: count() })
+    .from(ticket)
+    .where(
+      and(
+        eq(ticket.status, "verified"),
+        eq(ticket.verifiedByStation, stationId),
+      ),
+    );
+  return { label: station.label, scans: row?.value ?? 0 };
 }

@@ -24,8 +24,18 @@ type ScanResult =
 
 const CONTAINER_ID = "qr-reader";
 
-export function QrScanner() {
+export function QrScanner({
+  stationLabel,
+  initialScanCount,
+}: {
+  stationLabel: string;
+  initialScanCount: number;
+}) {
   const [result, setResult] = useState<ScanResult | null>(null);
+  // Seeded from the server, then bumped locally on each first-time verification so the number is
+  // live without refetching. Repeat scans and invalid QRs don't change it — same rule the server
+  // uses when it counts.
+  const [scanCount, setScanCount] = useState(initialScanCount);
   const [initError, setInitError] = useState<string | null>(null);
   const processingRef = useRef(false);
   const scannerRef = useRef<Html5QrcodeScanner | null>(null);
@@ -99,6 +109,7 @@ export function QrScanner() {
               flashRing("danger");
             } else {
               setResult({ status: "verified", person: body.data.person });
+              setScanCount((n) => n + 1);
               flashRing("success");
             }
           } catch {
@@ -159,6 +170,16 @@ export function QrScanner() {
 
   return (
     <div className="mx-auto max-w-md px-4">
+      <div className="mb-3 flex items-center justify-between rounded-xl border border-border bg-surface px-4 py-3">
+        <p className="text-sm text-muted-foreground">{stationLabel}</p>
+        <p className="text-sm">
+          Escaneos:{" "}
+          <strong className="text-lg font-semibold tabular-nums text-success">
+            {scanCount}
+          </strong>
+        </p>
+      </div>
+
       <div className="animate-fade-in-delay-1 rounded-2xl border border-border bg-surface p-4 shadow-sm">
         <p className="mb-3 text-center text-sm text-muted-foreground">
           {result
