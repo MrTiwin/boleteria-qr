@@ -40,7 +40,7 @@ export async function verifyTicket(
       ok: false,
       error: {
         code: "INVALID_SIGNATURE",
-        message: "El código QR no es válido.",
+        message: "Código QR no reconocido — no pertenece a este evento.",
       },
     };
   }

@@ -23,15 +23,12 @@ type ScanResult =
   | { status: "error"; message: string };
 
 const CONTAINER_ID = "qr-reader";
-// How long a result stays on screen before the panel clears itself, so the frame looks
-// "ready" again for the next scan instead of showing a stale result indefinitely.
-const RESULT_DISPLAY_MS = 5000;
 
 export function QrScanner() {
   const [result, setResult] = useState<ScanResult | null>(null);
   const [initError, setInitError] = useState<string | null>(null);
   const processingRef = useRef(false);
-  const clearTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const scannerRef = useRef<Html5QrcodeScanner | null>(null);
   // The ring's animation class is applied via this ref, not via React state driving a `key`
   // (that would remount #qr-reader itself — html5-qrcode grabs that element by id once and
   // must keep the same DOM node for the life of the camera view, or it breaks). Re-adding the
@@ -59,6 +56,7 @@ export function QrScanner() {
         },
         false,
       );
+      scannerRef.current = scanner;
     } catch {
       setInitError(
         "No se pudo iniciar la cámara en este dispositivo. Recarga la página o prueba con otro navegador.",
@@ -69,9 +67,13 @@ export function QrScanner() {
     try {
       scanner.render(
         async (decodedText) => {
+          // pause(true) freezes the video feed itself, so this guard against a second decode
+          // firing before the pause takes effect (or before the UI has re-rendered) — without
+          // it, a shaky hand between the scan and the pause landing could scan a second code and
+          // silently overwrite the first result before anyone reads it.
           if (processingRef.current) return;
           processingRef.current = true;
-          if (clearTimerRef.current) clearTimeout(clearTimerRef.current);
+          scanner.pause(true);
 
           try {
             const response = await fetch("/api/verify", {
@@ -106,14 +108,10 @@ export function QrScanner() {
                 "No se pudo conectar. Revisa tu conexión e intenta de nuevo.",
             });
             flashRing("danger");
-          } finally {
-            processingRef.current = false;
           }
-
-          clearTimerRef.current = setTimeout(
-            () => setResult(null),
-            RESULT_DISPLAY_MS,
-          );
+          // Deliberately no auto-clear/auto-resume here — the camera stays paused and the
+          // result stays on screen until the operator taps "Nuevo escaneo" below. That's the
+          // fix for "se mueve la cámara y ya escaneó otro": nothing scans again until asked to.
         },
         () => {},
       );
@@ -136,10 +134,15 @@ export function QrScanner() {
     }
 
     return () => {
-      if (clearTimerRef.current) clearTimeout(clearTimerRef.current);
       scanner.clear().catch(() => {});
     };
   }, []);
+
+  function handleNewScan() {
+    setResult(null);
+    processingRef.current = false;
+    scannerRef.current?.resume();
+  }
 
   if (initError) {
     return (
@@ -158,7 +161,9 @@ export function QrScanner() {
     <div className="mx-auto max-w-md px-4">
       <div className="animate-fade-in-delay-1 rounded-2xl border border-border bg-surface p-4 shadow-sm">
         <p className="mb-3 text-center text-sm text-muted-foreground">
-          Apunta la cámara al código QR del ticket
+          {result
+            ? "Cámara en pausa — revisa el resultado abajo"
+            : "Apunta la cámara al código QR del ticket"}
         </p>
         <div ref={ringElRef} className="rounded-xl">
           <div
@@ -168,7 +173,7 @@ export function QrScanner() {
         </div>
       </div>
 
-      <div className="mt-4 min-h-14" aria-live="assertive">
+      <div className="mt-4" aria-live="assertive">
         {result?.status === "verified" && (
           <div
             role="alert"
@@ -187,7 +192,7 @@ export function QrScanner() {
             <PersonSummary person={result.person} />
             {result.stationLabel && (
               <p className="text-sm text-muted-foreground">
-                Verificado antes en {result.stationLabel}
+                Ya fue verificado antes en {result.stationLabel}
               </p>
             )}
           </div>
@@ -195,10 +200,20 @@ export function QrScanner() {
         {result?.status === "error" && (
           <div
             role="alert"
-            className="animate-pop-in flex min-h-14 items-center justify-center rounded-xl border border-danger/30 bg-danger/10 p-4 text-danger"
+            className="animate-pop-in flex min-h-14 items-center justify-center rounded-xl border border-danger/30 bg-danger/10 p-4 text-center text-danger"
           >
             {result.message}
           </div>
+        )}
+
+        {result && (
+          <button
+            type="button"
+            onClick={handleNewScan}
+            className="animate-fade-in mt-4 h-14 w-full rounded-lg bg-primary px-4 font-medium text-primary-foreground transition duration-150 ease-out hover:brightness-95 active:scale-[0.98]"
+          >
+            Nuevo escaneo
+          </button>
         )}
       </div>
     </div>
